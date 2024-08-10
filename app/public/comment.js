@@ -1,21 +1,15 @@
-function createCommentElement(comment){
+function createCommentElement(comment) {
     const commentElement = document.createElement('div');
-    commentElement.className = 'comment-container';
-
-    const textElement = document.createElement('span');
-    textElement.textContent = `${comment.poster_id}: ${comment.body}`;
-    textElement.className = 'comment-text';
-
-    const dateElement = document.createElement('span');
-    const date = new Date(comment.created_at);
-    const formattedDate = date.toLocaleString();
-
-    dateElement.textContent = ` (Posted on ${formattedDate})`;
-    dateElement.className = 'comment-time';
-
-    commentElement.appendChild(textElement);
-    commentElement.appendChild(dateElement);
-
+    commentElement.classList.add('comment');
+    
+    const commentBody = document.createElement('p');
+    commentBody.textContent = `${comment.poster_id}: ${comment.body}`;
+    commentElement.appendChild(commentBody);
+    
+    const commentDate = document.createElement('small');
+    commentDate.textContent = new Date(comment.created_at).toLocaleString();
+    commentElement.appendChild(commentDate);
+    
     return commentElement;
 }
 
