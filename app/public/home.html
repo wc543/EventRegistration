@@ -1,25 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="style.css">
-  <title>Events</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+    <title>Events</title>
 </head>
 <body>
     <h1>Event Registration</h1>
-  <ul>
-    <li><a href="home.html">Home</a></li>
-    <li><a href="event.html">Events</a></li>
-    <li><a href="message.html">Messages</a></li>
-    <li><a href="notification.html">Notifications</a></li>
-  </ul>
+    <ul>
+        <li><a href="home.html">Home</a></li>
+        <li><a href="event.html">Events</a></li>
+        <li><a href="message.html">Messages</a></li>
+        <li><a href="notification.html">Notifications</a></li>
+        <li><a href="login.html">Log In/Sign Up</a></li>
+    </ul>
 
-  <h2>This is the home page</h2>
+    <h2>This is the home page</h2>
 
-<script>
+    <!-- Container to hold the public events -->
+    <div id="events-container"></div>
 
-</script>
+    <script>
+        // Function to fetch public events and display them
+        async function fetchPublicEvents() {
+            try {
+                const response = await fetch('/publicevents');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch public events');
+                }
+                const data = await response.json();
+                displayEvents(data.username);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
 
+        // Function to create and display event elements
+        function displayEvents(events) {
+            const container = document.getElementById('events-container');
+            container.innerHTML = ''; // Clear existing content
+
+            if (events.length === 0) {
+                container.innerHTML = '<p>No public events found.</p>';
+                return;
+            }
+
+            events.forEach(event => {
+                const eventElement = document.createElement('div');
+                eventElement.className = 'event';
+
+                eventElement.innerHTML = `
+                    <h3>${event.event_name}</h3>
+                    <p>${event.description}</p>
+                    <p><strong>Date:</strong> ${new Date(event.event_date).toLocaleDateString()}</p>
+                    <p><strong>Location:</strong> ${event.address}</p>
+                    <p><strong>YouTube Link:</strong> <a href="${event.yt_link}" target="_blank">${event.yt_link}</a></p>
+                `;
+
+                container.appendChild(eventElement);
+            });
+        }
+
+        // Fetch and display public events when the page loads
+        window.onload = fetchPublicEvents;
+    </script>
 </body>
 </html>

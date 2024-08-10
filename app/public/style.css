@@ -17,3 +17,28 @@ li a {
     padding: 10px;
     text-decoration: none;
 }
+
+.event {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.event h3 {
+    margin-top: 0;
+}
+
+.event p {
+    margin: 5px 0;
+}
+
+.event a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.event a:hover {
+    text-decoration: underline;
+}
