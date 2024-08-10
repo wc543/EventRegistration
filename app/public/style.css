@@ -42,3 +42,13 @@ li a {
 .event a:hover {
     text-decoration: underline;
 }
+
+.comment-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.comment-time {
+    margin-left: 10px;
+}

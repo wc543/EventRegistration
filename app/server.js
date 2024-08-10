@@ -31,6 +31,7 @@ app.use(session({
   saveUninitialized: true,
   resave: true
 }));
+
 app.post('/createEvent', authMiddleware, async (req, res) => {
   console.log("waffles");
   console.log(req.user);
@@ -38,6 +39,7 @@ app.post('/createEvent', authMiddleware, async (req, res) => {
   console.log(eventName, eventDate, eventTime, eventDescription, isPrivate, ytLink, address, created_at);
   adminId = req.user.userId;
   console.log(adminId);
+  
   try {
     // Check if the adminId exists in the users table
     const adminCheck = await pool.query('SELECT id FROM users WHERE id = $1', [adminId]);
@@ -57,6 +59,36 @@ app.post('/createEvent', authMiddleware, async (req, res) => {
   }
 });
 
+app.post('/events/:eventId/comments', authMiddleware, async (req, res) => {
+  const { eventId } = req.params;
+  const { body, created_at } = req.body;
+  const poster_id = req.user.userId;
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO comments("body", "poster_id", "event_id", "created_at")
+      VALUES ($1, $2, $3, $4) RETURNING id;`,
+      [body, poster_id, eventId, created_at]
+    );
+    res.status(201).json({ commentId: result.rows[0].id });
+  } catch (err) {
+    console.error('Error executing query:', err.message, err.stack);
+    res.status(500).json({ error: err.message });
+}});
+
+app.get('/events/:eventId/comments', async (req, res) => {
+  const { eventId } = req.params;
+
+  try {
+    const result = await pool.query(
+      `SELECT * FROM comments WHERE "event_id" = $1 ORDER BY created_at ASC;`,
+      [eventId]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error executing query:', err.message, err.stack);
+    res.status(500).json({ error: err.message });
+}});
 
 // User registration endpoint
 app.post('/register', async (req, res) => {
