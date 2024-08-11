@@ -57,6 +57,7 @@
     <div class="container">
         <h2>Sign Up</h2>
         <form id="signupForm">
+            <input id="username" type="text" name="username" placeholder="Username" required>
             <input id="email" type="text" name="email" placeholder="Email" required>
             <input id="password" type="password" name="password" placeholder="Password" required>
             <input id="confirmPassword" type="password" name="confirmPassword" placeholder="Confirm Password" required>
@@ -72,6 +73,7 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
+            const username = document.getElementById('username').value;
 
             // Check if passwords match
             if (password !== confirmPassword) {
@@ -81,7 +83,7 @@
     
             const details = {
                 email: email,
-                username: "Greg",
+                username: username,
                 password: password,
                 address: "",
                 emailOptIn: "f"

@@ -220,11 +220,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
 
         if (response.ok) {
-            const events = await response.json();
+            const {events} = await response.json();
             const eventList = document.getElementById('eventList');
             eventList.innerHTML = '';
-            for (let event of events.username) {
-                if (!event.isPrivate) { // Render only public events
+            for (let event of events) {
                     const newEvent = document.createElement('li');
                     newEvent.innerHTML = `
                         <div class="eventDetails">
@@ -234,7 +233,6 @@ document.addEventListener('DOMContentLoaded', async function() {
                         </div>
                     `;
                     eventList.appendChild(newEvent);
-                }
             }
         } else {
             console.error('Failed to fetch events');
