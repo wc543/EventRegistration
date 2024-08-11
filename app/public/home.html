@@ -31,7 +31,7 @@
                     throw new Error('Failed to fetch public events');
                 }
                 const data = await response.json();
-                displayEvents(data.username);
+                displayEvents(data.events);
             } catch (error) {
                 console.error('Error:', error);
             }
