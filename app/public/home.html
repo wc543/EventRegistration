@@ -21,7 +21,6 @@
     <!-- Container to hold the public events -->
     <div id="events-container"></div>
 
-    <script src="comment.js" defer></script>
     <script>
         // Function to fetch public events and display them
         async function fetchPublicEvents() {
@@ -50,7 +49,6 @@
             events.forEach(event => {
                 const eventElement = document.createElement('div');
                 eventElement.className = 'event';
-                eventElement.id = `event-${event.id}`;
 
                 eventElement.innerHTML = `
                     <h3>${event.event_name}</h3>
@@ -58,35 +56,9 @@
                     <p><strong>Date:</strong> ${new Date(event.event_date).toLocaleDateString()}</p>
                     <p><strong>Location:</strong> ${event.address}</p>
                     <p><strong>YouTube Link:</strong> <a href="${event.yt_link}" target="_blank">${event.yt_link}</a></p>
-                    <div class="comments">
-                        <h4>Comments</h4>
-                        <form class="comment-form-${event.id}" id="comment-form-${event.id}" data-event-id="${event.id}">
-                            <input type="text" name="comment" placeholder="Add comment" required>
-                            <button type="submit">Post</button>
-                        </form>
-                        <div class="comments-list-${event.id}"></div>
-                    </div>
                 `;
 
                 container.appendChild(eventElement);
-
-                const form = document.getElementById(`comment-form-${event.id}`);
-                const eventId = form.getAttribute('data-event-id');
-
-                if(form){
-                    form.addEventListener('submit', async(event) => {
-                        const input = form.querySelector('input[name="comment"]');
-                        const commentText = input.value;
-
-                        await postComment(eventId, commentText);
-                        input.value = '';
-                    });
-                    fetchComments(eventId);
-                }
-
-                else{
-                    console.error(`Form with ID comment-form-${event.id} not found`);
-                }
             });
         }
         // Fetch and display public events when the page loads

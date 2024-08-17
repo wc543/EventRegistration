@@ -198,6 +198,7 @@
     <!-- Notification Element -->
     <div id="notification" class="notification"></div>
 
+<script src="comment.js" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', async function() {
     // Display the email from cookies
@@ -225,14 +226,42 @@ document.addEventListener('DOMContentLoaded', async function() {
             eventList.innerHTML = '';
             for (let event of events) {
                     const newEvent = document.createElement('li');
+                    newEvent.id = `event-${event.id}`;
+                    
                     newEvent.innerHTML = `
                         <div class="eventDetails">
                             <span class="eventName">${event.event_name}</span>
                             <span class="eventDate">${new Date(event.event_date).toLocaleDateString()} at ${new Date(event.event_date).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</span>
                             <div class="eventDescription">${event.description}</div>
                         </div>
+                        <div class="comments">
+                        <h4>Comments</h4>
+                        <form class="comment-form-${event.id}" id="comment-form-${event.id}" data-event-id="${event.id}">
+                            <input type="text" name="comment" placeholder="Add comment" required>
+                            <button type="submit">Post</button>
+                        </form>
+                        <div class="comments-list-${event.id}"></div>
+                        </div>
                     `;
                     eventList.appendChild(newEvent);
+
+                    const form = document.getElementById(`comment-form-${event.id}`);
+                    const eventId = form.getAttribute('data-event-id');
+
+                    if(form){
+                        form.addEventListener('submit', async(event) => {
+                            const input = form.querySelector('input[name="comment"]');
+                            const commentText = input.value;
+
+                            await postComment(eventId, commentText);
+                            input.value = '';
+                        });
+                        fetchComments(eventId);
+                    }
+
+                    else{
+                        console.error(`Form with ID comment-form-${event.id} not found`);
+                    }
             }
         } else {
             console.error('Failed to fetch events');
