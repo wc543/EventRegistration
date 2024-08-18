@@ -15,6 +15,7 @@ const env = require("../env.json"); // Ensure the path to env.json is correct
 const Pool = pg.Pool;
 const pool = new Pool(env);
 const authMiddleware = require('./middleware/authenticateToken.js');
+const authorizeEventAccess = require('./middleware/authorizeEventAccess.js');
 
 pool.connect().then(function () {
   console.log(`Connected to database ${env.database}`);
@@ -144,7 +145,6 @@ app.post('/login', async (req, res) => {
           const match = await bcrypt.compare(password, user.hashed_password);
           if (match) {
               const token = jwt.sign({ userId: user.id }, env.session_key, { expiresIn: '1h' });
-
               // Set both the token and email in cookies
               res.cookie('token', token, {
                   httpOnly: true,
@@ -236,6 +236,113 @@ app.get('/publicevents', authMiddleware, async (req, res) => {
       }
   } catch (err) {
       res.status(500).json({ error: err.message });
+  }
+});
+
+// Apply the authenticateToken middleware to all routes
+
+// Route to get event details
+app.get('/event/:id', async (req, res) => {
+  const eventId = req.params.id;
+
+  try {
+      const result = await pool.query('SELECT * FROM events WHERE "id" = $1', [eventId]);
+      const event = result.rows[0]; // Extract the first row from the result
+
+      if (event) {
+          res.json(event);
+      } else {
+          res.status(404).json({ message: 'Event not found' });
+      }
+  } catch (error) {
+      console.error('Error fetching event details:', error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+app.get('/auth/status', authMiddleware, (req, res) => {
+  // If the user is authenticated, the authMiddleware will attach user info to req.user
+  if (req.user) {
+      res.json({ loggedIn: true, user: req.user });
+  } else {
+      res.json({ loggedIn: false });
+  }
+});
+
+// Add this to your existing server code
+app.post('/logout', authMiddleware, async (req, res) => {
+  const userId = req.user.userId;
+  try {
+    // Clear the session token for the logged-out user
+    await pool.query('UPDATE users SET session_token = $1 WHERE id = $2', ['', userId]);
+
+    // Clear cookies
+    res.clearCookie('token');
+    res.clearCookie('user_email');
+    
+    res.status(200).json({ message: 'Logged out successfully' });
+  } catch (err) {
+    console.error('Error logging out:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/notifications', authMiddleware, async (req, res) => {
+  try {
+      // Get user ID from req.user set by authMiddleware
+      const user_id = req.user.userId;
+      console.log(user_id);
+
+      if (!user_id) {
+          return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      // Query the database for notifications associated with the user
+      const result = await pool.query(
+          'SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC',
+          [user_id]
+      );
+
+      // Respond with the notifications
+      res.status(200).json(result.rows);
+  } catch (error) {
+      console.error('Error fetching notifications:', error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.post('/notification', authMiddleware, async (req, res) => {
+  const { event_id, body, created_at } = req.body;
+
+  if (!body || !created_at) {
+      return res.status(400).json({ message: 'Body and created_at are required' });
+  }
+
+  try {
+      // Fetch the event to get the author ID
+      const eventResult = await pool.query(
+          'SELECT admin_id FROM events WHERE id = $1',
+          [event_id]
+      );
+
+      if (eventResult.rows.length === 0) {
+          return res.status(404).json({ message: 'Event not found' });
+      }
+
+      const admin_id = eventResult.rows[0].admin_id;
+
+      // Insert notification into the database
+      const result = await pool.query(
+          'INSERT INTO notifications (user_id, event_id, body, created_at) VALUES ($1, $2, $3, $4) RETURNING *',
+          [admin_id, event_id, body, created_at]
+      );
+
+      const newNotification = result.rows[0];
+      res.status(201).json(newNotification);
+  } catch (error) {
+      console.error('Error creating notification:', error);
+      res.status(500).json({ message: 'Internal server error' });
   }
 });
 
