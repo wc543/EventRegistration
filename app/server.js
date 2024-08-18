@@ -43,6 +43,8 @@ app.post('/createEvent', authMiddleware, async (req, res) => {
   console.log(eventName, eventDate, eventTime, eventDescription, isPrivate, ytLink, address, created_at);
   adminId = req.user.userId;
   console.log(adminId);
+
+  console.log('before:', ytLink);
   
   try {
     // Check if the adminId exists in the users table
@@ -56,6 +58,8 @@ app.post('/createEvent', authMiddleware, async (req, res) => {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`,
       [isPrivate, ytLink, adminId, eventName, eventDescription, created_at, address, eventDate]
     );
+
+    console.log('after:', ytLink);
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error('Error executing query:', err.message, err.stack);

@@ -158,6 +158,7 @@
                     throw new Error('Failed to fetch video');
                 }
                 const video = await response.json();
+                console.log(video);
                 return video.embedUrl;
             } catch (error) {
                 console.error('Error:', error);
@@ -181,6 +182,7 @@
 
                 try {
                     if(event.yt_link) {
+                        console.log('yt link:', event.yt_link);
                         const url = new URL(event.yt_link);
                         const videoId = url.searchParams.get('v');
 
@@ -213,22 +215,6 @@
                 `;
 
                 container.appendChild(eventElement);
-
-                const form = document.getElementById(`comment-form-${event.id}`);
-                const eventId = form.getAttribute('data-event-id');
-
-                if (form) {
-                    form.addEventListener('submit', async(event) => {
-                        const input = form.querySelector('input[name="comment"]');
-                        const commentText = input.value;
-
-                        await postComment(eventId, commentText);
-                        input.value = '';
-                    });
-                    fetchComments(eventId);
-                } else {
-                    console.error(`Form with ID comment-form-${event.id} not found`);
-                }
             };
         }
 

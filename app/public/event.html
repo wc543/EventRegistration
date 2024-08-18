@@ -349,6 +349,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const eventDate = document.getElementById('eventDate').value;
         const eventTime = document.getElementById('eventTime').value;
         const eventDescription = document.getElementById('eventDescription').value;
+        const ytLink = document.getElementById('ytLink').value;
         const isPrivate = document.getElementById('eventPrivate').checked;
 
         // Combine date and time
@@ -360,7 +361,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             eventTime: eventTime,
             eventDescription: eventDescription,
             isPrivate: isPrivate, 
-            ytLink: "",
+            ytLink: ytLink,
             address: "",
             created_at: new Date().toISOString()
         };
