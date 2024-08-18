@@ -117,3 +117,6 @@ ALTER TABLE "blocked_users" ADD CONSTRAINT "blocked_users_fk1" FOREIGN KEY ("blo
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("id");
 
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_fk2" FOREIGN KEY ("event_id") REFERENCES "events"("id");
+
+ALTER TABLE "private_event_members" DROP CONSTRAINT IF EXISTS "private_event_members_event_id_key";
+ALTER TABLE "private_event_members" ADD CONSTRAINT "private_event_members_user_event_unique" UNIQUE ("user_id", "event_id");
