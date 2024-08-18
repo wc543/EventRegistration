@@ -158,6 +158,35 @@
             z-index: 1000;
             font-size: 16px;
         }
+
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            cursor: pointer;
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            background-color: #f4f4f4;
+            margin: 0 5px;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .tab.active {
+            background-color: #4CAF50;
+            color: white;
+            border-bottom: none;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -191,8 +220,29 @@
             </form>
         </div>
 
-        <h3>Upcoming Events</h3>
-        <ul id="eventList"></ul>
+        <div id="inviteFormContainer" style="display:none;">
+            <h3>Invite Users to Private Event</h3>
+            <form id="inviteUserForm">
+                <label for="inviteUsername">Username:</label>
+                <input type="text" id="inviteUsername" name="inviteUsername" required>
+                <input type="hidden" id="eventId" name="eventId">
+                <button type="submit">Invite</button>
+            </form>
+        </div>
+
+        <div class="tab-container">
+            <div class="tab active" data-tab="public-events">Public Events</div>
+            <div class="tab" data-tab="private-events">Private Events</div>
+        </div>
+
+        <div id="public-events" class="tab-content active">
+            <h3>Upcoming Public Events</h3>
+            <ul id="publicEventList"></ul>
+        </div>
+        <div id="private-events" class="tab-content">
+            <h3>Upcoming Private Events</h3>
+            <ul id="privateEventList"></ul>
+        </div>
     </div>
 
     <!-- Notification Element -->
@@ -208,124 +258,182 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
     }
 
-    const email = getCookie('user_email'); // Replace 'user_email' with the actual cookie name
+    const email = getCookie('user_email'); 
     document.getElementById('userEmail').textContent = email ? `Logged in as: ${email}` : 'Not logged in';
 
-    // Fetch events
-    try {
-        const response = await fetch('/publicevents', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        });
+    // Fetch and display public events
+    fetchEvents('/publicevents', 'publicEventList');
 
-        if (response.ok) {
-            const {events} = await response.json();
-            const eventList = document.getElementById('eventList');
+    // Fetch and display private events
+    fetchEvents('/privateevents', 'privateEventList');
+
+    // Function to fetch and display events
+    function fetchEvents(url, listId) {
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch events');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data.events || !Array.isArray(data.events)) {
+                throw new Error('Invalid events data');
+            }
+            const eventList = document.getElementById(listId);
             eventList.innerHTML = '';
-            for (let event of events) {
-                    const newEvent = document.createElement('li');
-                    newEvent.id = `event-${event.id}`;
-                    
-                    newEvent.innerHTML = `
-                        <div class="eventDetails">
-                            <span class="eventName">${event.event_name}</span>
-                            <span class="eventDate">${new Date(event.event_date).toLocaleDateString()} at ${new Date(event.event_date).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</span>
-                            <div class="eventDescription">${event.description}</div>
-                        </div>
-                        <div class="comments">
+            data.events.forEach(event => {
+                const newEvent = document.createElement('li');
+                newEvent.id = `event-${event.id}`;
+                
+                newEvent.innerHTML = `
+                    <div class="eventDetails">
+                        <span class="eventName">${event.event_name}</span>
+                        <span class="eventDate">${new Date(event.event_date).toLocaleDateString()} at ${new Date(event.event_date).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</span>
+                        <div class="eventDescription">${event.description}</div>
+                        ${event.is_private ? `<button class="inviteBtn" data-event-id="${event.id}">Invite Users</button>` : ''}
+                    </div>
+                    <div class="comments">
                         <h4>Comments</h4>
                         <form class="comment-form-${event.id}" id="comment-form-${event.id}" data-event-id="${event.id}">
                             <input type="text" name="comment" placeholder="Add comment" required>
                             <button type="submit">Post</button>
                         </form>
                         <div class="comments-list-${event.id}"></div>
-                        </div>
-                    `;
-                    eventList.appendChild(newEvent);
+                    </div>
+                `;
+                eventList.appendChild(newEvent);
 
-                    const form = document.getElementById(`comment-form-${event.id}`);
-                    const eventId = form.getAttribute('data-event-id');
+                const form = document.getElementById(`comment-form-${event.id}`);
+                const eventId = form.getAttribute('data-event-id');
 
-                    if(form){
-                        form.addEventListener('submit', async(event) => {
-                            const input = form.querySelector('input[name="comment"]');
-                            const commentText = input.value;
+                if (form) {
+                    form.addEventListener('submit', async(event) => {
+                        event.preventDefault();
+                        const input = form.querySelector('input[name="comment"]');
+                        const commentText = input.value;
 
-                            await postComment(eventId, commentText);
-                            input.value = '';
-                        });
-                        fetchComments(eventId);
-                    }
+                        await postComment(eventId, commentText);
+                        input.value = '';
+                    });
+                    fetchComments(eventId);
+                } else {
+                    console.error(`Form with ID comment-form-${event.id} not found`);
+                }
 
-                    else{
-                        console.error(`Form with ID comment-form-${event.id} not found`);
-                    }
-            }
-        } else {
-            console.error('Failed to fetch events');
-            alert('Failed to load events');
-        }
-    } catch (error) {
-        console.error('Error fetching events:', error);
-        alert('Error fetching events');
-    }
-});
+                // Handle inviting users (only if the event is private)
+                if (event.is_private) {
+                    const inviteBtn = newEvent.querySelector('.inviteBtn');
+                    inviteBtn.addEventListener('click', function() {
+                        const eventId = this.getAttribute('data-event-id');
+                        document.getElementById('eventId').value = eventId; // Set the event ID in the invite form
+                        document.getElementById('inviteFormContainer').style.display = 'block'; // Show the invite form
+                    });
+                }
+            });
+        })
+        .catch(error => console.error('Error fetching events:', error));
+}
 
-document.getElementById('createEventBtn').addEventListener('click', function() {
-    const eventForm = document.getElementById('eventForm');
-    eventForm.style.display = eventForm.style.display === 'block' ? 'none' : 'block';
-});
-
-document.getElementById('eventCreationForm').addEventListener('submit', async function(event) {
-    event.preventDefault();
-
-    const eventName = document.getElementById('eventName').value;
-    const eventDate = document.getElementById('eventDate').value;
-    const eventTime = document.getElementById('eventTime').value;
-    const eventDescription = document.getElementById('eventDescription').value;
-    const isPrivate = document.getElementById('eventPrivate').checked; // Get the checkbox value
-
-    // Combine date and time
-    const eventDateTime = new Date(`${eventDate}T${eventTime}`);
-
-    const eventDetails = {
-        eventName: eventName,
-        eventDate: eventDateTime.toISOString(), // Ensure ISO format for submission
-        eventTime: eventTime,
-        eventDescription: eventDescription,
-        isPrivate: isPrivate, // Include checkbox value
-        ytLink: "",
-        address: "",
-        created_at: new Date().toISOString()
-    };
-
-    const response = await fetch('/createEvent', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(eventDetails)
+    document.getElementById('createEventBtn').addEventListener('click', function() {
+        const eventForm = document.getElementById('eventForm');
+        eventForm.style.display = eventForm.style.display === 'block' ? 'none' : 'block';
     });
 
-    const notification = document.getElementById('notification');
+    document.getElementById('eventCreationForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
 
-    if (response.ok) {
-        notification.textContent = 'Event created successfully!';
-        notification.style.backgroundColor = '#4CAF50';
-        notification.style.display = 'block';
-    } else {
-        notification.textContent = 'Failed to create event.';
-        notification.style.backgroundColor = '#f44336'; // Red color for error
-        notification.style.display = 'block';
-    }
+        const eventName = document.getElementById('eventName').value;
+        const eventDate = document.getElementById('eventDate').value;
+        const eventTime = document.getElementById('eventTime').value;
+        const eventDescription = document.getElementById('eventDescription').value;
+        const isPrivate = document.getElementById('eventPrivate').checked;
 
-    setTimeout(() => {
-        notification.style.display = 'none';
-    }, 3000); // Hide the notification after 3 seconds
+        // Combine date and time
+        const eventDateTime = new Date(`${eventDate}T${eventTime}`);
 
-    document.getElementById('eventForm').reset(); // Reset form fields
+        const eventDetails = {
+            eventName: eventName,
+            eventDate: eventDateTime.toISOString(), 
+            eventTime: eventTime,
+            eventDescription: eventDescription,
+            isPrivate: isPrivate, 
+            ytLink: "",
+            address: "",
+            created_at: new Date().toISOString()
+        };
+
+        try {
+            const response = await fetch('/createEvent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(eventDetails)
+            });
+
+            const notification = document.getElementById('notification');
+
+            if (response.ok) {
+                notification.textContent = 'Event created successfully!';
+                notification.style.backgroundColor = '#4CAF50';
+                notification.style.display = 'block';
+                // Refresh the appropriate event list
+                fetchEvents(isPrivate ? '/privateevents' : '/publicevents', isPrivate ? 'privateEventList' : 'publicEventList');
+            } else {
+                notification.textContent = 'Failed to create event.';
+                notification.style.backgroundColor = '#f44336'; // Red color for error
+                notification.style.display = 'block';
+            }
+
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000); // Hide the notification after 3 seconds
+
+            document.getElementById('eventForm').reset(); // Reset form fields
+        } catch (error) {
+            console.error('Error creating event:', error);
+        }
+    });
+
+    document.getElementById('inviteUserForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const username = document.getElementById('inviteUsername').value;
+        const eventId = document.getElementById('eventId').value;
+
+        try {
+            const response = await fetch('/inviteUser', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, eventId })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                alert(`User invited successfully! Invitation link: ${result.invitationLink}`);
+            } else {
+                const errorResult = await response.json();
+                alert(`Failed to invite user: ${errorResult.error}`);
+            }
+        } catch (error) {
+            console.error('Error inviting user:', error);
+        }
+    });
+
+    // Handle tab switching
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            tabs.forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.tab).classList.add('active');
+        });
+    });
 });
 </script>
 </body>

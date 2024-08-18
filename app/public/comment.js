@@ -39,7 +39,6 @@ async function fetchComments(eventId){
 
 async function postComment(eventId, commentText){
     try {
-
         if(!eventId){
             throw Error("No event ID found");
         }
@@ -55,14 +54,23 @@ async function postComment(eventId, commentText){
         });
 
         if(!response.ok){
-            throw Error('An unexpected error occured');
+            throw Error('An unexpected error occurred');
         }
 
+        // Assuming the response contains the newly created comment
         const comment = await response.json();
+
+        // Create a new comment element
         const commentList = document.querySelector(`.comments-list-${eventId}`);
         
         if(commentList){
-            commentList.appendChild(createCommentElement(comment));
+            // Append the new comment to the list immediately
+            const commentElement = createCommentElement({
+                poster_id: 'You', 
+                body: commentText,
+                created_at: new Date().toISOString()
+            });
+            commentList.appendChild(commentElement);
         }
 
     } catch (err) {

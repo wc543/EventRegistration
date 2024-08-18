@@ -187,25 +187,123 @@ app.post('/signup', async (req, res) => {
   }
 });
 
-app.get('/publicevents', authMiddleware, async (req, res) => {
+// In server.js
+
+// Endpoint for fetching private events
+app.get('/privateevents', authMiddleware, async (req, res) => {
   try {
-      let result;
       const userId = req.user.userId;
-      if (userId) {
-          result = await pool.query('SELECT * FROM events WHERE "is_private" = false OR ("is_private" = true AND "admin_id" = $1)', [userId]);
-      } else {
-          result = await pool.query('SELECT * FROM events WHERE "is_private" = false');
-      }
+
+      // Fetch private events where the user is either the creator or an invited member
+      const result = await pool.query(`
+          SELECT e.* FROM events e
+          LEFT JOIN private_event_members pem ON e.id = pem.event_id
+          WHERE e.is_private = true AND (e.admin_id = $1 OR pem.user_id = $1)`, [userId]);
 
       if (result.rows.length > 0) {
           res.json({ events: result.rows });
       } else {
-          res.status(404).json({ error: 'No events were found' });
+          res.status(404).json({ error: 'No private events found' });
       }
   } catch (err) {
       res.status(500).json({ error: err.message });
   }
 });
+
+
+// Ensure publicevents only returns public events
+app.get('/publicevents', async (req, res) => {
+  try {
+      const result = await pool.query('SELECT * FROM events WHERE "is_private" = false');
+
+      if (result.rows.length > 0) {
+          res.json({ events: result.rows });
+      } else {
+          res.status(404).json({ error: 'No public events were found' });
+      }
+  } catch (err) {
+      res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/inviteUser', authMiddleware, async (req, res) => {
+    const { eventId, username } = req.body;
+    const adminId = req.user.userId;
+
+    try {
+        // Check if the user making the request is the event creator
+        const eventCheck = await pool.query('SELECT * FROM events WHERE id = $1 AND admin_id = $2', [eventId, adminId]);
+
+        if (eventCheck.rows.length === 0) {
+            return res.status(403).json({ error: 'You do not have permission to invite users to this event' });
+        }
+
+        // Fetch the user ID based on the username
+        const userCheck = await pool.query('SELECT id FROM users WHERE username = $1', [username]);
+
+        if (userCheck.rows.length === 0) {
+            console.log(`User not found for username: ${username}`);
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const userId = userCheck.rows[0].id;
+        console.log(`Retrieved userId: ${userId} for username: ${username}`);
+
+        if (!userId) {
+            console.log('Failed to retrieve user ID');
+            return res.status(500).json({ error: 'Failed to retrieve user ID' });
+        }
+
+        // Check if the user is already invited to the event
+        const existingInvite = await pool.query('SELECT * FROM private_event_members WHERE user_id = $1 AND event_id = $2', [userId, eventId]);
+
+        if (existingInvite.rows.length > 0) {
+            console.log(`User with userId: ${userId} is already invited to eventId: ${eventId}`);
+            return res.status(400).json({ error: 'User is already invited to this event' });
+        }
+
+        // Add the user to the private_event_members table
+        await pool.query('INSERT INTO private_event_members (user_id, event_id) VALUES ($1, $2)', [userId, eventId]);
+        console.log(`User with userId: ${userId} invited to eventId: ${eventId}`);
+
+        // Generate a unique URL hash for the invitation
+        const urlHash = require('crypto').randomBytes(16).toString('hex');
+        await pool.query('INSERT INTO pending_invitation (event_id, url_hash) VALUES ($1, $2)', [eventId, urlHash]);
+
+        res.status(200).json({ message: 'User invited successfully', invitationLink: `/joinEvent/${urlHash}` });
+    } catch (err) {
+        console.error('Error inviting user:', err.message);
+        res.status(500).json({ error: 'An error occurred while inviting the user' });
+    }
+});
+
+app.get('/joinEvent/:urlHash', authMiddleware, async (req, res) => {
+  const { urlHash } = req.params;
+  const userId = req.user.userId;
+
+  try {
+      const result = await pool.query('SELECT * FROM pending_invitation WHERE url_hash = $1', [urlHash]);
+
+      if (result.rows.length === 0) {
+          return res.status(404).json({ error: 'Invalid invitation link' });
+      }
+
+      const { event_id } = result.rows[0];
+
+      // Add the user to the private_event_members table
+      await pool.query('INSERT INTO private_event_members (user_id, event_id) VALUES ($1, $2)', [userId, event_id]);
+
+      // Optionally, delete the invitation after it's been used
+      await pool.query('DELETE FROM pending_invitation WHERE url_hash = $1', [urlHash]);
+
+      res.redirect('/privateevents');
+  } catch (err) {
+      console.error('Error joining event:', err.message);
+      res.status(500).json({ error: 'An error occurred while joining the event' });
+  }
+});
+
+
 
 
 app.listen(port, () => {
