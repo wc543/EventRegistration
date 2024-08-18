@@ -185,6 +185,8 @@
                 <input type="time" id="eventTime" name="eventTime" required><br><br>
                 <label for="eventDescription">Event Description:</label><br>
                 <textarea id="eventDescription" name="eventDescription" rows="4" cols="50" required></textarea><br><br>
+                <label for="ytLink">Youtube Link:</label>
+                <input type="text" id="ytLink" name="ytLink"><br><br>
                 <label for="eventPrivate">Private Event:</label>
                 <input type="checkbox" id="eventPrivate" name="eventPrivate"><br><br>
                 <input type="submit" value="Submit">
@@ -285,6 +287,7 @@ document.getElementById('eventCreationForm').addEventListener('submit', async fu
     const eventDate = document.getElementById('eventDate').value;
     const eventTime = document.getElementById('eventTime').value;
     const eventDescription = document.getElementById('eventDescription').value;
+    const ytLink = document.getElementById('ytLink').value || "";
     const isPrivate = document.getElementById('eventPrivate').checked; // Get the checkbox value
 
     // Combine date and time
@@ -296,7 +299,7 @@ document.getElementById('eventCreationForm').addEventListener('submit', async fu
         eventTime: eventTime,
         eventDescription: eventDescription,
         isPrivate: isPrivate, // Include checkbox value
-        ytLink: "",
+        ytLink: ytLink,
         address: "",
         created_at: new Date().toISOString()
     };
