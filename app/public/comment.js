@@ -37,11 +37,35 @@ async function fetchComments(eventId){
     }
 }
 
-async function postComment(eventId, commentText){
+async function postComment(eventId, commentText) {
     try {
-        if(!eventId){
-            throw Error("No event ID found");
+        if (!eventId) {
+            throw new Error("No event ID found");
         }
+        
+        console.log("Attempting to post notification...");
+
+        // Post notification
+        const notificationResponse = await fetch(`/notification`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json', // Add Content-Type header
+                'session_key': 'ssKey' // Ensure this header is needed or correct
+            },
+            body: JSON.stringify({
+                event_id: eventId,
+                body: "You have received a new comment",
+                created_at: new Date().toISOString()
+            })
+        });
+
+        if (!notificationResponse.ok) {
+            throw new Error('Failed to post notification');
+        }
+        
+        console.log("Notification posted successfully");
+
+        // Post comment
         const response = await fetch(`/events/${eventId}/comments`, {
             method: 'POST',
             headers: {
@@ -53,11 +77,12 @@ async function postComment(eventId, commentText){
             })
         });
 
-        if(!response.ok){
-            throw Error('An unexpected error occurred');
+        if (!response.ok) {
+            throw new Error('Failed to post comment');
         }
 
-        // Assuming the response contains the newly created comment
+        console.log("Comment posted successfully");
+
         const comment = await response.json();
 
         // Create a new comment element

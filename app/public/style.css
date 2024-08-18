@@ -42,3 +42,74 @@ li a {
 .event a:hover {
     text-decoration: underline;
 }
+
+/* Basic styling for the notifications sidebar */
+#notifications-sidebar {
+    position: fixed;
+    right: -400px; /* Completely hidden off-screen */
+    top: 0;
+    width: 300px;
+    height: 100%;
+    background-color: #f1f1f1; /* Light background color for the sidebar */
+    box-shadow: -2px 0 5px rgba(0,0,0,0.5);
+    transition: right 0.3s ease;
+    z-index: 1000;
+    padding: 20px;
+    overflow-y: auto; /* Optional: Add vertical scrolling if content overflows */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center items horizontally */
+}
+
+/* Ensure the body doesn't allow horizontal scrolling */
+body {
+    overflow-x: hidden;
+}
+
+#notifications-button {
+    position: fixed;
+    right: 10px;
+    top: 20px;
+    z-index: 1100;
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#notifications-sidebar.active {
+    right: 0; /* Slide into view */
+}
+
+#notifications-list {
+    list-style-type: none;
+    padding: 0;
+    width: 100%; /* Make the list take up full width */
+}
+
+.notification-item {
+    border: 0px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-bottom: 10px;
+    background-color: #fff; /* Ensure background is white */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 80%; /* Adjust width to fit within the sidebar */
+    max-width: 280px; /* Prevent items from being too wide */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center content within each notification box */
+}
+
+
+.notification-item h4 {
+    margin: 0 0 10px;
+    font-size: 1.2em;
+}
+
+.notification-item p {
+    margin: 0;
+}
