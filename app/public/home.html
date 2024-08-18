@@ -36,8 +36,21 @@
             }
         }
 
+        async function fetchVideo(videoId) {
+            try {
+                const response = await fetch(`/video/${videoId}`);
+                if(!response.ok) {
+                    throw new Error('Failed to fetch video');
+                }
+                const video = await response.json();
+                return video.embedUrl;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
         // Function to create and display event elements
-        function displayEvents(events) {
+        async function displayEvents(events) {
             const container = document.getElementById('events-container');
             container.innerHTML = ''; // Clear existing content
 
@@ -46,20 +59,46 @@
                 return;
             }
 
-            events.forEach(event => {
+            for(const event of events) {
                 const eventElement = document.createElement('div');
                 eventElement.className = 'event';
+                let videoUrl = '';
+
+                try {
+                    if(event.yt_link) {
+                        const url = new URL(event.yt_link);
+                        const videoId = url.searchParams.get('v');
+
+                        if(videoId) {
+                            videoUrl = await fetchVideo(videoId);
+                        }
+
+                        else{
+                            console.error('Youtube URL missing video Id:', event.yt_link);
+                        }
+                    }
+
+                    else {
+                        console.error('Youtube link undefined', event.yt_link);
+                    }
+                } catch (error) {
+                    console.error('Invalid Youtube URL:', event.yt_link, error);
+                    videoUrl = '';
+                }
 
                 eventElement.innerHTML = `
                     <h3>${event.event_name}</h3>
                     <p>${event.description}</p>
                     <p><strong>Date:</strong> ${new Date(event.event_date).toLocaleDateString()}</p>
                     <p><strong>Location:</strong> ${event.address}</p>
-                    <p><strong>YouTube Link:</strong> <a href="${event.yt_link}" target="_blank">${event.yt_link}</a></p>
+                    ${videoUrl ? `
+                        <p><strong>Youtube Video:</strong></p>
+                        <iframe width="720" height="400" src="${videoUrl}" frameborder="0" allowfullscreen></iframe>
+                        ` : ` <p><strong>Youtube Video:</strong></p> `}
                 `;
 
                 container.appendChild(eventElement);
-            });
+            };
         }
         // Fetch and display public events when the page loads
         window.onload = fetchPublicEvents;
