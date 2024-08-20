@@ -43,7 +43,7 @@
         async function getNotifications() {
             try {
                 console.log("in th method");
-                let response = await fetch('/notifications', {
+                let response = await fetch('/notifications/getall', {
                     method: 'GET',
                     credentials: 'include' // Include cookies in the request
                 });
@@ -91,9 +91,9 @@
 
     <h1>Event Registration</h1>
     <ul>
-        <li><a href="home.html">Home</a></li>
-        <li><a href="event.html">Events</a></li>
-        <li><a href="message.html">Messages</a></li>
+        <li><a href="/">Home</a></li>
+        <li><a href="/events.html">Events</a></li>
+        <li><a href="/message.html">Messages</a></li>
         <li><a id="login-signup-button" href="login.html">Log In/Sign Up</a></li>
         <li><a id="logout-button">Log Out</a></li>
     </ul>
@@ -126,7 +126,7 @@
         // Function to log out the user
         document.getElementById('logout-button').addEventListener('click', async function() {
             try {
-                const response = await fetch('/logout', { method: 'POST' });
+                const response = await fetch('/account/logout', { method: 'POST' });
                 if (response.ok) {
                     // Redirect to the login page or refresh the page
                     window.location.href = 'home.html'; // Or window.location.reload();
@@ -141,7 +141,7 @@
         // Function to fetch public events and display them
         async function fetchPublicEvents() {
             try {
-                const response = await fetch('/publicevents');
+                const response = await fetch('/events/getpublic');
                 if (!response.ok) {
                     throw new Error('Failed to fetch public events');
                 }

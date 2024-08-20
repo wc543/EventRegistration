@@ -7,5 +7,60 @@
 </head>
 <body>
     <p>If you are not redirected automatically, follow this <a href="home.html">link to home.html</a>.</p>
+
 </body>
 </html>
+
+
+
+<!--
+
+<script>
+    /*
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://unpkg.com/navigo"></script>
+    <meta charset="UTF-8">
+    <title>My Single Page App</title>
+</head>
+<body>
+    
+
+
+    <div id="app"></div>
+
+    <script>
+        // Initialize Navigo
+        const router = new Navigo('/');
+
+        /*
+            <nav>
+        <a href="/" data-navigo>Home</a>
+        <a href="/about" data-navigo>About</a>
+        <a href="/events" data-navigo>Events</a>
+    </nav>*/
+
+        // Define a function to load content
+        function loadPage(page) {
+            fetch(page)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('app').innerHTML = html;
+                });
+        }
+
+        // Define routes
+        router.on({
+            '/': () => loadPage('home.html'),
+            '/events': () => loadPage('events.html'),
+            '/login': () => loadPage('login.html')
+        });
+
+        // Resolve the current route
+        router.resolve();
+    </script>
+</body>
+</html>*/
+</script>
+-->

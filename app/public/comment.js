@@ -46,7 +46,7 @@ async function postComment(eventId, commentText) {
         console.log("Attempting to post notification...");
 
         // Post notification
-        const notificationResponse = await fetch(`/notification`, {
+        const notificationResponse = await fetch(`/notifications/create`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json', // Add Content-Type header
