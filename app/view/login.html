@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up Page</title>
+    <title>Login Page</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -45,7 +45,7 @@
         .container button:hover {
             background-color: #45a049;
         }
-        .container .login-link {
+        .container .signup-link {
             margin-top: 15px;
             display: block;
             text-decoration: none;
@@ -55,42 +55,29 @@
 </head>
 <body>
     <div class="container">
-        <h2>Sign Up</h2>
-        <form id="signupForm">
-            <input id="username" type="text" name="username" placeholder="Username" required>
+        <h2>Login</h2>
+        <form id="loginForm">
             <input id="email" type="text" name="email" placeholder="Email" required>
             <input id="password" type="password" name="password" placeholder="Password" required>
-            <input id="confirmPassword" type="password" name="confirmPassword" placeholder="Confirm Password" required>
-            <button type="submit">Sign Up</button>
+            <button type="submit">Login</button>
         </form>
-        <a href="/login.html" class="login-link">Already have an account? Log in</a>
+        <a href="/signup" class="signup-link">Don't have an account? Sign up</a>
     </div>
 
     <script>
-        document.getElementById('signupForm').addEventListener('submit', async function(event) {
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
             event.preventDefault(); // Prevent the default form submission
     
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const username = document.getElementById('username').value;
-
-            // Check if passwords match
-            if (password !== confirmPassword) {
-                displayMessage('Passwords do not match!', 'error');
-                return;
-            }
     
             const details = {
                 email: email,
-                username: username,
                 password: password,
-                address: "",
-                emailOptIn: "f"
             };
     
             try {
-                const response = await fetch('/signup', {
+                const response = await fetch('/api/account/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -99,8 +86,8 @@
                 });
     
                 if (response.ok) {
-                    displayMessage('Signed up successfully!', 'success');
-                    // Optionally, you can add logic here to redirect to login page after success
+                    displayMessage('Logged in successfully!', 'success');
+                    window.location.href = '/';
                 } else {
                     const errorData = await response.json();
                     displayMessage(`Error: ${errorData.error || 'Something went wrong!'}`, 'error');

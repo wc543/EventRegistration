@@ -18,7 +18,7 @@ async function fetchComments(eventId){
         if(!eventId){
             throw Error('No event ID found');
         }
-        const response = await fetch(`/events/${eventId}/comments`);
+        const response = await fetch(`/api/events/${eventId}/comments`);
 
         if(!response.ok){
             throw Error('Failed to fetch comments');
@@ -37,6 +37,7 @@ async function fetchComments(eventId){
     }
 }
 
+
 async function postComment(eventId, commentText) {
     try {
         if (!eventId) {
@@ -46,7 +47,7 @@ async function postComment(eventId, commentText) {
         console.log("Attempting to post notification...");
 
         // Post notification
-        const notificationResponse = await fetch(`/notification`, {
+        const notificationResponse = await fetch(`/api/notifications/create`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json', // Add Content-Type header
@@ -66,7 +67,7 @@ async function postComment(eventId, commentText) {
         console.log("Notification posted successfully");
 
         // Post comment
-        const response = await fetch(`/events/${eventId}/comments`, {
+        const response = await fetch(`/api/events/${eventId}/comments`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
