@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/style.css">
     <title>Events</title>
     <style>
         /* Add any other styles needed for your buttons */
@@ -43,7 +43,7 @@
         async function getNotifications() {
             try {
                 console.log("in th method");
-                let response = await fetch('/notifications/getall', {
+                let response = await fetch('/api/notifications/getall', {
                     method: 'GET',
                     credentials: 'include' // Include cookies in the request
                 });
@@ -63,38 +63,57 @@
         }
 
         function displayNotifications(notifications) {
-            const notificationsList = document.getElementById('notifications-list');
-            notificationsList.innerHTML = ''; // Clear existing notifications
+    const notificationsList = document.getElementById('notifications-list');
+    notificationsList.innerHTML = ''; // Clear existing notifications
 
-            if (notifications.length === 0) {
-                notificationsList.innerHTML = '<li>No new notifications.</li>';
-                return;
+    if (notifications.length === 0) {
+        notificationsList.innerHTML = '<li>No new notifications.</li>';
+        return;
+    }
+
+    notifications.forEach(async (notification) => {
+        try {
+            // Fetch event details
+            const response = await fetch(`/api/events/${notification.event_id}`, {
+                method: 'GET',
+                credentials: 'include' // Include cookies in the request
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
             }
 
-            notifications.forEach(notification => {
-                const notificationElement = document.createElement('li');
-                notificationElement.className = 'notification-item';
+            const event = await response.json();
 
-                // Create a container for the notification content
-                const notificationContent = document.createElement('div');
-                notificationContent.innerHTML = `
-                    <h4>Event ID: ${notification.event_id}</h4>
-                    <p>${notification.body}</p>
-                `;
+            // Create a container for the notification content
+            const notificationElement = document.createElement('li');
+            notificationElement.className = 'notification-item';
 
-                notificationElement.appendChild(notificationContent);
-                notificationsList.appendChild(notificationElement);
+            const notificationContent = document.createElement('div');
+            notificationContent.innerHTML = `
+                <h4>Event Name: ${event.event_name}</h4>
+                <p>${notification.body}</p>
+            `;
+
+            notificationElement.appendChild(notificationContent);
+            notificationElement.addEventListener('click', () => {
+                window.location.href = `/event/${notification.event_id}`;
             });
+            notificationsList.appendChild(notificationElement);
+
+        } catch (error) {
+            console.error('Error fetching event details:', error);
         }
+    });
+}
 
     </script>
 
     <h1>Event Registration</h1>
     <ul>
         <li><a href="/">Home</a></li>
-        <li><a href="/events.html">Events</a></li>
-        <li><a href="/message.html">Messages</a></li>
-        <li><a id="login-signup-button" href="login.html">Log In/Sign Up</a></li>
+        <li><a href="/events">Events</a></li>
+        <li><a id="login-signup-button" href="login">Log In/Sign Up</a></li>
         <li><a id="logout-button">Log Out</a></li>
     </ul>
 
@@ -126,10 +145,10 @@
         // Function to log out the user
         document.getElementById('logout-button').addEventListener('click', async function() {
             try {
-                const response = await fetch('/account/logout', { method: 'POST' });
+                const response = await fetch('/api/account/logout', { method: 'POST' });
                 if (response.ok) {
                     // Redirect to the login page or refresh the page
-                    window.location.href = 'home.html'; // Or window.location.reload();
+                    window.location.href = '/'; // Or window.location.reload();
                 } else {
                     console.error('Failed to log out');
                 }
@@ -141,7 +160,7 @@
         // Function to fetch public events and display them
         async function fetchPublicEvents() {
             try {
-                const response = await fetch('/events/getpublic');
+                const response = await fetch('/api/events/getpublic');
                 if (!response.ok) {
                     throw new Error('Failed to fetch public events');
                 }

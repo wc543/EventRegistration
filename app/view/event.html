@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/style.css">
+        <script src="/comment.js"></script>
+        <title>Events</title>
+    </head>
+    <body>
+        <div class="container">
+            <ul class="nav">
+                <li><a href="../">Home</a></li>
+                <li><a href="../login">Login</a></li>
+            </ul>
+            
+            <h2>Event Registration</h2>
+        
+            <!-- Placeholder for displaying the event ID -->
+            <p id="eventIdDisplay"></p>
+        </div>
+
+        <div id="eventObject"></div>
+        <script>
+            async function loadEvent() {
+        // Get the event ID from the URL
+        let eventId = window.location.pathname.split('/').pop();
+
+        // Display the event ID on the screen
+        document.getElementById('eventIdDisplay').textContent = `Event ID: ${eventId}`;
+
+        try {
+            // Fetch event data from the server
+            const response = await fetch(`/api/events/${eventId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            let eventElement = document.getElementById("eventObject");
+
+            if (response.ok) {
+                const event = await response.json();
+                let videoUrl = '';
+
+                try {
+                    if(event.yt_link) {
+                        console.log('YouTube link:', event.yt_link);
+                        const url = new URL(event.yt_link);
+                        console.log("URL: ", url);
+                        const videoId = url.searchParams.get('v');
+                        console.log("videoId: ", videoId);
+                        if (videoId) {
+                            videoUrl = await fetchVideo(videoId)
+                        } else {
+                            console.error('YouTube URL missing video ID:', event.yt_link);
+                        }
+                    } else {
+                        console.error('YouTube link undefined', event.yt_link);
+                    }
+                } catch (error) {
+                    console.error('Invalid YouTube URL:', event.yt_link, error);
+                    videoUrl = '';
+                }
+
+                async function fetchVideo(videoId) {
+                    console.log("videoIdINSIDE: ", videoId);
+                    try {
+                        const response = await fetch(`/api/video/${videoId}`);
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch video');
+                        }
+                        const video = await response.json();
+                        console.log("video :", video);
+                        return video.embedUrl;
+                    } catch (error) {
+                        console.error('Error:', error);
+                        return '';
+                    }
+                }
+
+                eventElement.innerHTML = `
+                    <h3>${event.event_name}</h3>
+                    <p>${event.description}</p>
+                    <p><strong>Date:</strong> ${new Date(event.event_date).toLocaleDateString()}</p>
+                    <p><strong>Location:</strong> ${event.address}</p>
+                    <p><strong>YouTube Link:</strong> <a href="${event.yt_link}" target="_blank">${event.yt_link}</a></p>
+                    <div class="comments">
+                        <h4>Comments</h4>
+                        <form class="comment-form-${event.id}" id="comment-form-${event.id}" data-event-id="${event.id}">
+                            <input type="text" name="comment" placeholder="Add comment" required>
+                            <button type="submit">Post</button>
+                        </form>
+                        <div class="comments-list-${event.id}"></div>
+                    </div>
+
+                    ${videoUrl ? `
+                        <p><strong>YouTube Video:</strong></p>
+                        <iframe width="720" height="400" src="${videoUrl}" frameborder="0" allowfullscreen></iframe>
+                        ` : `<p><strong>YouTube Video:</strong></p>`}
+                `;
+                fetchComments(eventId);
+
+                const form = document.getElementById(`comment-form-${event.id}`);
+
+                if (form) {
+                    form.addEventListener('submit', async (event) => {
+                        event.preventDefault(); // Prevent the form from submitting normally
+                        const input = form.querySelector('input[name="comment"]');
+                        const commentText = input.value;
+
+                        await postComment(eventId, commentText);
+                        input.value = '';
+                    });
+                } else {
+                    console.error(`Form with ID comment-form-${event.id} not found`);
+                }
+            } else {
+                console.error('Failed to fetch event');
+                alert('Failed to load event');
+            }
+        } catch (error) {
+            console.error('Error fetching event:', error);
+        }
+    }
+
+    // Run the async function
+    loadEvent();
+        </script>
+    </body>
+</html>

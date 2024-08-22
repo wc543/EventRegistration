@@ -78,7 +78,7 @@ router.post('/register', async (req, res) => {
               });
   
                 await pool.query('UPDATE users SET session_token = $1 WHERE id = $2', [token, user.id]);
-                res.redirect('/home.html');
+                res.redirect('/');
             } else {
                 res.status(401).json({ error: 'Invalid password' });
             }
