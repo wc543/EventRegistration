@@ -193,10 +193,8 @@
     <div id="userEmail"></div>
     <div class="container">
         <ul class="nav">
-            <li><a href="home.html">Home</a></li>
-            <li><a href="message.html">Messages</a></li>
-            <li><a href="notification.html">Notifications</a></li>
-            <li><a href="login.html">Login</a></li>
+            <li><a href="/">Home</a></li>
+            <li><a href="/login">Login</a></li>
         </ul>
         
         <h2>Event Registration</h2>
@@ -264,15 +262,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('userEmail').textContent = email ? `Logged in as: ${email}` : 'Not logged in';
 
     // Fetch and display public events
-    fetchEvents('/publicevents', 'publicEventList');
+    fetchEvents('/api/events/getpublic', 'publicEventList');
 
     // Fetch and display private events
-    fetchEvents('/privateevents', 'privateEventList');
+    fetchEvents('/api/events/getprivate', 'privateEventList');
 
     // Function to fetch and display events
     function fetchEvents(url, listId) {
+        console.log(url);
     fetch(url)
         .then(response => {
+            console.log(response);
             if (!response.ok) {
                 throw new Error('Failed to fetch events');
             }
@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         };
 
         try {
-            const response = await fetch('/createEvent', {
+            const response = await fetch('/api/events/create', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -382,7 +382,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 notification.style.backgroundColor = '#4CAF50';
                 notification.style.display = 'block';
                 // Refresh the appropriate event list
-                fetchEvents(isPrivate ? '/privateevents' : '/publicevents', isPrivate ? 'privateEventList' : 'publicEventList');
+                fetchEvents(isPrivate ? '/api/events/getprivate' : '/api/events/getpublic', isPrivate ? 'privateEventList' : 'publicEventList');
             } else {
                 notification.textContent = 'Failed to create event.';
                 notification.style.backgroundColor = '#f44336'; // Red color for error
@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const eventId = document.getElementById('eventId').value;
 
         try {
-            const response = await fetch('/inviteUser', {
+            const response = await fetch('/api/events/inviteUser', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
