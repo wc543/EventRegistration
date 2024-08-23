@@ -172,7 +172,7 @@
 
         async function fetchVideo(videoId) {
             try {
-                const response = await fetch(`/video/${videoId}`);
+                const response = await fetch(`/api/video/${videoId}`);
                 if(!response.ok) {
                     throw new Error('Failed to fetch video');
                 }
