@@ -113,3 +113,8 @@ body {
 .notification-item p {
     margin: 0;
 }
+
+.map-container {
+    height: 500px;
+    width: 500px;
+}

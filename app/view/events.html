@@ -206,6 +206,8 @@
             <form id="eventCreationForm">
                 <label for="eventName">Event Name:</label>
                 <input type="text" id="eventName" name="eventName" required><br><br>
+                <label for="eventAddress">Event Address:</label>
+                <input type="text" id="eventAddress" name="eventAddress" required><br><br>
                 <label for="eventDate">Event Date:</label>
                 <input type="date" id="eventDate" name="eventDate" required><br><br>
                 <label for="eventTime">Event Time:</label>
@@ -346,6 +348,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         event.preventDefault();
 
         const eventName = document.getElementById('eventName').value;
+        const eventAddress = document.getElementById('eventAddress').value;
         const eventDate = document.getElementById('eventDate').value;
         const eventTime = document.getElementById('eventTime').value;
         const eventDescription = document.getElementById('eventDescription').value;
@@ -362,7 +365,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             eventDescription: eventDescription,
             isPrivate: isPrivate, 
             ytLink: ytLink,
-            address: "",
+            address: eventAddress,
             created_at: new Date().toISOString()
         };
 
