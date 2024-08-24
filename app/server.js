@@ -13,6 +13,7 @@ const accountRoutes = require('./routes/accountRoutes.js');
 const eventRoutes = require('./routes/eventRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const videoRoutes = require('./routes/videoRoutes');
+const geocodeRoutes = require('./routes/geocodeRoutes');
 
 
 app.use(express.json());
@@ -28,6 +29,7 @@ app.use('/api/events', eventRoutes);
 app.use('/api/account', accountRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/video', videoRoutes);
+app.use('/api', geocodeRoutes);
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'view', 'home.html'));
