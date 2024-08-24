@@ -9,13 +9,12 @@ const port = 3000;
 const hostname = "localhost";
 
 const env = require("../env.json"); // Ensure the path to env.json is correct
+const passport = require('./middleware/facebookConfig');
 const accountRoutes = require('./routes/accountRoutes.js');
 const eventRoutes = require('./routes/eventRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const videoRoutes = require('./routes/videoRoutes');
 
-
-app.use(express.json());
 app.use(express.static(path.join(__dirname, 'style')));
 app.use(express.static(path.join(__dirname, 'helpers')));
 app.use(cookieParser());
@@ -24,6 +23,10 @@ app.use(session({
   saveUninitialized: true,
   resave: true
 }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(passport.initialize());
+app.use(passport.session());
 app.use('/api/events', eventRoutes);
 app.use('/api/account', accountRoutes);
 app.use('/api/notifications', notificationRoutes);

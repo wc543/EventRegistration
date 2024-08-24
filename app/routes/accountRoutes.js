@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db'); // Adjust the path if necessary
 const authMiddleware = require('../middleware/authenticateToken');
+const passport = require('../middleware/facebookConfig');
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const env = require("../../env.json"); // Ensure the path to env.json is correct
@@ -89,6 +90,19 @@ router.post('/register', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
   });
+
+// Route to initiate Facebook authentication
+router.get('/auth/facebook',
+    passport.authenticate('facebook', { scope: ['email'] })
+);
+
+// Callback URL that Facebook redirects to after authentication
+router.get('/auth/facebook/callback',
+    passport.authenticate('facebook', {
+        successRedirect: '/', // Redirect to home after successful login
+        failureRedirect: '/login' // Redirect to login page on failure
+    })
+);
 
   router.post('/logout', authMiddleware, async (req, res) => {
     const userId = req.user.userId;
