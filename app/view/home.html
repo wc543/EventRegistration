@@ -4,6 +4,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/style.css">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/opencagedata/leaflet-opencage-geocoding@v2.0.0/dist/css/L.Control.OpenCageGeocoding.min.css" />
+    <script src="https://cdn.jsdelivr.net/gh/opencagedata/leaflet-opencage-geocoding@v2.0.0/dist/js/L.Control.OpenCageGeocoding.min.js"></script>
+    
     <title>Events</title>
     <style>
         /* Add any other styles needed for your buttons */
@@ -133,6 +145,8 @@
     <!-- Container to hold the public events -->
     <div id="events-container"></div>
 
+    <script src="map.js" defer></script>
+
     <script>
         // Function to toggle the notifications sidebar
         document.getElementById('notifications-button').addEventListener('click', function() {
@@ -184,6 +198,21 @@
             }
         }
 
+        async function fetchGeocode(address) {
+            try {
+                const encodeAddress = encodeURIComponent(address);
+                const response = await fetch(`/api/geocode?address=${encodeAddress}`);
+                if(!response.ok) {
+                    throw new Error('Failed to fetch geocode');
+                }
+                const geocode = await response.json();
+                console.log(geocode);
+                return geocode;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
         // Function to create and display event elements
         async function displayEvents(events) {
             const container = document.getElementById('events-container');
@@ -197,7 +226,10 @@
             for(const event of events) {
                 const eventElement = document.createElement('div');
                 eventElement.className = 'event';
+                const eventName = event.event_name;
+                const address = event.address;
                 let videoUrl = '';
+                let geocode = '';
 
                 try {
                     if(event.yt_link) {
@@ -222,18 +254,25 @@
                     videoUrl = '';
                 }
 
+                geocode = await fetchGeocode(address);
+                const mapId = `map-${event.id}`;
+
                 eventElement.innerHTML = `
                     <h3>${event.event_name}</h3>
                     <p>${event.description}</p>
                     <p><strong>Date:</strong> ${new Date(event.event_date).toLocaleDateString()}</p>
                     <p><strong>Location:</strong> ${event.address}</p>
+                    <div id="${mapId}" class="map-container"></div>
                     ${videoUrl ? `
                         <p><strong>Youtube Video:</strong></p>
                         <iframe width="720" height="400" src="${videoUrl}" frameborder="0" allowfullscreen></iframe>
                         ` : ` <p><strong>Youtube Video:</strong></p> `}
                 `;
-
                 container.appendChild(eventElement);
+
+                if(geocode) {
+                    createMap(mapId, geocode.lat, geocode.lng, address, eventName);
+                }
             };
         }
 
