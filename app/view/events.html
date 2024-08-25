@@ -5,188 +5,245 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Events</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0;
-            padding: 20px;
-        }
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f2f5;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #333;
+    }
 
-        .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            width: 100%;
-            margin-top: 20px;
-        }
+    .container {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        max-width: 700px;
+        width: 100%;
+        margin-top: 20px;
+        box-sizing: border-box; /* Ensure padding is included in width calculation */
+    }
 
-        .container h2, .container h3 {
-            text-align: center;
-        }
+    #searchBar {
+        width: calc(100% - 20px); /* Adjust width to account for container padding */
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        box-sizing: border-box; /* Ensure padding is included in width calculation */
+    }
 
-        .nav {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-            text-align: center;
-            margin-bottom: 20px;
-        }
+    .container h2, .container h3 {
+        text-align: center;
+        color: #4CAF50;
+        margin-bottom: 20px;
+    }
 
-        .nav li {
-            display: inline;
-            margin: 0 10px;
-        }
+    .nav {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        text-align: center;
+        margin-bottom: 20px;
+    }
 
-        .nav li a {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            text-align: center;
-            transition: background-color 0.3s ease;
-        }
+    .nav li {
+        display: inline;
+        margin: 0 10px;
+    }
 
-        .nav li a:hover {
-            background-color: #45a049;
-        }
+    .nav li a {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        text-align: center;
+        transition: background-color 0.3s ease;
+    }
 
-        #createEventBtn {
-            width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-bottom: 20px;
-        }
+    .nav li a:hover {
+        background-color: #45a049;
+    }
 
-        #createEventBtn:hover {
-            background-color: #45a049;
-        }
+    #createEventBtn {
+        width: 100%;
+        padding: 15px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        transition: background-color 0.3s ease;
+    }
 
-        #eventForm {
-            display: none; /* Initially hidden */
-            margin-bottom: 20px;
-        }
+    #createEventBtn:hover {
+        background-color: #45a049;
+    }
 
-        #eventForm input, #eventForm textarea {
-            width: calc(100% - 22px);
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
+    #eventForm {
+        display: none;
+        margin-bottom: 20px;
+    }
 
-        #eventForm input[type="submit"] {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-        }
+    #eventForm input, #eventForm textarea {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+    }
 
-        #eventForm input[type="submit"]:hover {
-            background-color: #45a049;
-        }
+    #eventForm input[type="submit"] {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+        font-size: 16px;
+        font-weight: bold;
+    }
 
-        #eventList {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
+    #eventForm input[type="submit"]:hover {
+        background-color: #45a049;
+    }
 
-        #eventList li {
-            padding: 20px;
-            margin-bottom: 10px;
-            background-color: #e7e7e7;
-            border-radius: 5px;
-            box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
-        }
+    #eventList, #publicEventList, #privateEventList {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
 
-        .eventDetails {
-            display: flex;
-            flex-direction: column;
-        }
+    #eventList li {
+        padding: 20px;
+        margin-bottom: 15px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-left: 5px solid #4CAF50;
+        transition: transform 0.3s ease;
+    }
 
-        .eventDetails span {
-            margin-bottom: 5px;
-        }
+    #eventList li:hover {
+        transform: translateY(-5px);
+    }
 
-        .eventName {
-            font-weight: bold;
-        }
+    .eventDetails {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 15px;
+        border: 1px solid #ddd; /* Add a border around the event details */
+        border-radius: 8px;
+    }
 
-        .eventDate {
-            font-style: italic;
-        }
+    .eventDetails span {
+        margin-bottom: 3px;
+    }
 
-        .eventDescription {
-            margin-top: 10px;
-        }
+    .eventName {
+        font-weight: bold;
+        font-size: 1.2em;
+        color: #333;
+    }
 
-        #userEmail {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-        }
+    .eventDate {
+        font-style: italic;
+        font-size: 0.9em;
+        color: #666;
+    }
 
-        /* Notification styles */
-        .notification {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #4CAF50;
-            color: white;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            display: none;
-            z-index: 1000;
-            font-size: 16px;
-        }
+    .eventDescription {
+        margin-top: 10px;
+        font-size: 1em;
+        color: #555;
+        line-height: 1.5em;
+    }
 
-        .tab-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
+    .eventLink {
+        text-decoration: none;
+        color: inherit;
+    }
 
-        .tab {
-            cursor: pointer;
-            padding: 10px 20px;
-            border: 1px solid #ccc;
-            background-color: #f4f4f4;
-            margin: 0 5px;
-            border-radius: 5px 5px 0 0;
-        }
+    #emptyListMessage {
+        text-align: center; /* Center the text horizontally */
+        font-family: Arial, sans-serif; /* Use a nice, clean font */
+        font-size: 1.2em; /* Slightly larger font size */
+        color: #666; /* Soft grey color for the text */
+        margin: 20px; /* Add some margin around the message */
+        padding: 20px; /* Add padding inside the div */
+        border: 1px solid #ddd; /* Light border around the message */
+        border-radius: 5px; /* Rounded corners for a smoother look */
+        background-color: #f9f9f9; /* Light background color for contrast */
+    }
 
-        .tab.active {
-            background-color: #4CAF50;
-            color: white;
-            border-bottom: none;
-        }
+    #userEmail {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+    }
 
-        .tab-content {
-            display: none;
-        }
+    /* Notification styles */
+    .notification {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #4CAF50;
+        color: white;
+        padding: 15px;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        display: none;
+        z-index: 1000;
+        font-size: 16px;
+    }
 
-        .tab-content.active {
-            display: block;
-        }
+    .tab-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .tab {
+        cursor: pointer;
+        padding: 10px 20px;
+        border: 1px solid #ccc;
+        background-color: #f4f4f4;
+        margin: 0 5px;
+        border-radius: 5px 5px 0 0;
+    }
+
+    .tab.active {
+        background-color: #4CAF50;
+        color: white;
+        border-bottom: none;
+    }
+
+    .tab-content {
+        display: none;
+        padding: 20px;
+        background-color: white;
+        border: 1px solid #ccc;
+        border-radius: 0 5px 5px 5px;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
     </style>
 </head>
 <body>
@@ -198,7 +255,8 @@
         </ul>
         
         <h2>Event Registration</h2>
-        
+        <input type="text" id="searchBar" placeholder="Search events by name..." style="width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ccc;">
+
         <button id="createEventBtn">Create Event</button>
 
         <div id="eventForm">
@@ -260,6 +318,32 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
     }
 
+    const searchBar = document.getElementById('searchBar');
+    const publicEventList = document.getElementById('publicEventList');
+    const privateEventList = document.getElementById('privateEventList');
+
+    searchBar.addEventListener('input', function() {
+        const searchTerm = searchBar.value.toLowerCase();
+
+        // Filter public events
+        filterEvents(publicEventList, searchTerm);
+
+        // Filter private events
+        filterEvents(privateEventList, searchTerm);
+    });
+
+    function filterEvents(eventList, searchTerm) {
+        const events = eventList.querySelectorAll('li');
+        events.forEach(event => {
+            const eventName = event.querySelector('.eventName').textContent.toLowerCase();
+            if (eventName.includes(searchTerm)) {
+                event.style.display = ''; // Show event
+            } else {
+                event.style.display = 'none'; // Hide event
+            }
+        });
+    }
+
     const email = getCookie('user_email'); 
     document.getElementById('userEmail').textContent = email ? `Logged in as: ${email}` : 'Not logged in';
 
@@ -271,70 +355,42 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Function to fetch and display events
     function fetchEvents(url, listId) {
-        console.log(url);
     fetch(url)
         .then(response => {
-            console.log(response);
             if (!response.ok) {
                 throw new Error('Failed to fetch events');
             }
             return response.json();
         })
         .then(data => {
-            if (!data.events || !Array.isArray(data.events)) {
-                throw new Error('Invalid events data');
-            }
             const eventList = document.getElementById(listId);
             eventList.innerHTML = '';
-            data.events.forEach(event => {
+            if (!data.events || !Array.isArray(data.events)) {
                 const newEvent = document.createElement('li');
-                newEvent.id = `event-${event.id}`;
-                
                 newEvent.innerHTML = `
-                    <div class="eventDetails">
-                        <span class="eventName">${event.event_name}</span>
-                        <span class="eventDate">${new Date(event.event_date).toLocaleDateString()} at ${new Date(event.event_date).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</span>
-                        <div class="eventDescription">${event.description}</div>
-                        ${event.is_private ? `<button class="inviteBtn" data-event-id="${event.id}">Invite Users</button>` : ''}
-                    </div>
-                    <div class="comments">
-                        <h4>Comments</h4>
-                        <form class="comment-form-${event.id}" id="comment-form-${event.id}" data-event-id="${event.id}">
-                            <input type="text" name="comment" placeholder="Add comment" required>
-                            <button type="submit">Post</button>
-                        </form>
-                        <div class="comments-list-${event.id}"></div>
-                    </div>
+                <div id="emptyListMessage">No events posted, check again later. <div>
                 `;
                 eventList.appendChild(newEvent);
+            }
+            else {
+                
+                data.events.forEach(event => {
+                    const newEvent = document.createElement('li');
+                    newEvent.id = `event-${event.id}`;
 
-                const form = document.getElementById(`comment-form-${event.id}`);
-                const eventId = form.getAttribute('data-event-id');
+                    newEvent.innerHTML = `
+                        <a href="/event/${event.id}" class="eventLink">
+                            <div class="eventDetails">
+                                <span class="eventName">${event.event_name}</span>
+                                <span class="eventDate">${new Date(event.event_date).toLocaleDateString()} at ${new Date(event.event_date).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</span>
+                                <div class="eventDescription">${event.description}</div>
+                            </div>
+                        </a>
 
-                if (form) {
-                    form.addEventListener('submit', async(event) => {
-                        event.preventDefault();
-                        const input = form.querySelector('input[name="comment"]');
-                        const commentText = input.value;
-
-                        await postComment(eventId, commentText);
-                        input.value = '';
-                    });
-                    fetchComments(eventId);
-                } else {
-                    console.error(`Form with ID comment-form-${event.id} not found`);
-                }
-
-                // Handle inviting users (only if the event is private)
-                if (event.is_private) {
-                    const inviteBtn = newEvent.querySelector('.inviteBtn');
-                    inviteBtn.addEventListener('click', function() {
-                        const eventId = this.getAttribute('data-event-id');
-                        document.getElementById('eventId').value = eventId; // Set the event ID in the invite form
-                        document.getElementById('inviteFormContainer').style.display = 'block'; // Show the invite form
-                    });
-                }
-            });
+                    `;
+                    eventList.appendChild(newEvent);
+                });
+            }      
         })
         .catch(error => console.error('Error fetching events:', error));
 }
