@@ -47,7 +47,7 @@ router.post('/register', async (req, res) => {
         console.log("set session token as cookie");
         res.cookie('token', sessionToken, {
             httpOnly: true,
-            secure: false // Set to true if you're using HTTPS
+            secure: true // Set to true if you're using HTTPS
         });
   
         res.status(201).json({ message: 'User registered successfully', userId, sessionToken });
@@ -98,10 +98,17 @@ router.get('/auth/facebook',
 
 // Callback URL that Facebook redirects to after authentication
 router.get('/auth/facebook/callback',
-    passport.authenticate('facebook', {
-        successRedirect: '/', // Redirect to home after successful login
-        failureRedirect: '/login' // Redirect to login page on failure
-    })
+    passport.authenticate('facebook', { failureRedirect: '/login' }),
+    async (req, res) => {
+        try {
+            console.log('Params from fbAuth:', Object.keys(req));
+
+            res.redirect('/');
+        } catch (error) {
+            console.error('Error in Facebook callback:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
 );
 
   router.post('/logout', authMiddleware, async (req, res) => {
