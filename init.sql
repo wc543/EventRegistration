@@ -120,3 +120,5 @@ ALTER TABLE "notifications" ADD CONSTRAINT "notifications_fk2" FOREIGN KEY ("eve
 
 ALTER TABLE "private_event_members" DROP CONSTRAINT IF EXISTS "private_event_members_event_id_key";
 ALTER TABLE "private_event_members" ADD CONSTRAINT "private_event_members_user_event_unique" UNIQUE ("user_id", "event_id");
+
+ALTER TABLE "users" ADD COLUMN "facebook_id" VARCHAR(255), ADD COLUMN "first_name" VARCHAR(255), ADD COLUMN "last_name" VARCHAR(255);
