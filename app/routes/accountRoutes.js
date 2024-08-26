@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db'); // Adjust the path if necessary
 const authMiddleware = require('../middleware/authenticateToken');
+const passport = require('../middleware/facebookConfig');
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const env = require("../../env.json"); // Ensure the path to env.json is correct
@@ -46,7 +47,7 @@ router.post('/register', async (req, res) => {
         console.log("set session token as cookie");
         res.cookie('token', sessionToken, {
             httpOnly: true,
-            secure: false // Set to true if you're using HTTPS
+            secure: true // Set to true if you're using HTTPS
         });
   
         res.status(201).json({ message: 'User registered successfully', userId, sessionToken });
@@ -89,6 +90,26 @@ router.post('/register', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
   });
+
+// Route to initiate Facebook authentication
+router.get('/auth/facebook',
+    passport.authenticate('facebook', { scope: ['email'] })
+);
+
+// Callback URL that Facebook redirects to after authentication
+router.get('/auth/facebook/callback',
+    passport.authenticate('facebook', { failureRedirect: '/login' }),
+    async (req, res) => {
+        try {
+            console.log('Params from fbAuth:', Object.keys(req));
+
+            res.redirect('/');
+        } catch (error) {
+            console.error('Error in Facebook callback:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
+);
 
   router.post('/logout', authMiddleware, async (req, res) => {
     const userId = req.user.userId;

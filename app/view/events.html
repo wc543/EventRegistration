@@ -212,6 +212,7 @@
         font-size: 16px;
     }
 
+
     .tab-container {
         display: flex;
         justify-content: center;
@@ -244,6 +245,21 @@
     .tab-content.active {
         display: block;
     }
+
+        .deleteBtn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 5px 10px;
+            margin-top: 10px;
+        }
+
+        .deleteBtn:hover {
+            background-color: #c0392b;
+        }
+
     </style>
 </head>
 <body>
@@ -348,52 +364,90 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('userEmail').textContent = email ? `Logged in as: ${email}` : 'Not logged in';
 
     // Fetch and display public events
-    fetchEvents('/api/events/getpublic', 'publicEventList');
+    fetchEvents('/api/events/getpublic', 'publicEventList', false);
 
     // Fetch and display private events
-    fetchEvents('/api/events/getprivate', 'privateEventList');
+    fetchEvents('/api/events/getprivate', 'privateEventList', true);
 
     // Function to fetch and display events
-    function fetchEvents(url, listId) {
-    fetch(url)
-        .then(response => {
+
+    async function fetchEvents(url, listId, isPrivate) {
+        console.log(url);
+        try {
+            const response = await fetch(url);
             if (!response.ok) {
                 throw new Error('Failed to fetch events');
             }
-            return response.json();
-        })
-        .then(data => {
+            const data = await response.json();
+
+            if (!data.events || !Array.isArray(data.events)) {
+                throw new Error('Invalid events data');
+            }
+
             const eventList = document.getElementById(listId);
             eventList.innerHTML = '';
-            if (!data.events || !Array.isArray(data.events)) {
-                const newEvent = document.createElement('li');
-                newEvent.innerHTML = `
-                <div id="emptyListMessage">No events posted, check again later. <div>
-                `;
-                eventList.appendChild(newEvent);
-            }
-            else {
-                
-                data.events.forEach(event => {
+            data.events.forEach(event => {
+                if (event.is_private === isPrivate) {
                     const newEvent = document.createElement('li');
                     newEvent.id = `event-${event.id}`;
 
                     newEvent.innerHTML = `
-                        <a href="/event/${event.id}" class="eventLink">
-                            <div class="eventDetails">
-                                <span class="eventName">${event.event_name}</span>
-                                <span class="eventDate">${new Date(event.event_date).toLocaleDateString()} at ${new Date(event.event_date).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</span>
-                                <div class="eventDescription">${event.description}</div>
-                            </div>
-                        </a>
-
+                        <div class="eventDetails">
+                            <span class="eventName">${event.event_name}</span>
+                            <span class="eventDate">${new Date(event.event_date).toLocaleDateString()} at ${new Date(event.event_date).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</span>
+                            <div class="eventDescription">${event.description}</div>
+                            <button class="deleteBtn" data-event-id="${event.id}">Delete</button>
+                            ${event.is_private ? `<button class="inviteBtn" data-event-id="${event.id}">Invite Users</button>` : ''}
+                        </div>
                     `;
                     eventList.appendChild(newEvent);
-                });
-            }      
-        })
-        .catch(error => console.error('Error fetching events:', error));
-}
+
+                    const deleteBtn = newEvent.querySelector('.deleteBtn');
+                    deleteBtn.addEventListener('click', async function() {
+                        const eventId = this.getAttribute('data-event-id');
+                        if (confirm('Are you sure you want to delete this event?')) {
+                            await deleteEvent(eventId);
+                        }
+                    });
+
+                    // Handle inviting users (only if the event is private)
+                    if (event.is_private) {
+                        const inviteBtn = newEvent.querySelector('.inviteBtn');
+                        inviteBtn.addEventListener('click', function() {
+                            const eventId = this.getAttribute('data-event-id');
+                            document.getElementById('eventId').value = eventId; // Set the event ID in the invite form
+                            document.getElementById('inviteFormContainer').style.display = 'block'; // Show the invite form
+                        });
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error fetching events:', error);
+        }
+    }
+
+    async function deleteEvent(eventId) {
+        try {
+            const response = await fetch(`/api/events/${eventId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${getCookie('token')}` // If using JWT in Authorization header
+                }
+            });
+
+            if (response.ok) {
+                alert('Event deleted successfully');
+                // Refresh the list of events
+                fetchEvents('/api/events/getpublic', 'publicEventList', false);
+                fetchEvents('/api/events/getprivate', 'privateEventList', true);
+            } else {
+                const errorData = await response.json();
+                alert(`Failed to delete event: ${errorData.error}`);
+            }
+        } catch (error) {
+            console.error('Error deleting event:', error);
+        }
+    }
 
     document.getElementById('createEventBtn').addEventListener('click', function() {
         const eventForm = document.getElementById('eventForm');
@@ -441,7 +495,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 notification.style.backgroundColor = '#4CAF50';
                 notification.style.display = 'block';
                 // Refresh the appropriate event list
-                fetchEvents(isPrivate ? '/api/events/getprivate' : '/api/events/getpublic', isPrivate ? 'privateEventList' : 'publicEventList');
+                fetchEvents(isPrivate ? '/api/events/getprivate' : '/api/events/getpublic', isPrivate ? 'privateEventList' : 'publicEventList', isPrivate);
             } else {
                 notification.textContent = 'Failed to create event.';
                 notification.style.backgroundColor = '#f44336'; // Red color for error
@@ -497,6 +551,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     });
 });
-</script>
+    </script>
 </body>
 </html>
