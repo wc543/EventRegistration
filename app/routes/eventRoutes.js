@@ -86,18 +86,11 @@ router.get('/getprivate', authMiddleware, async (req, res) => {
   router.get('/getpublic', authMiddleware, async (req, res) => {
     console.log("public inside");
     try {
-        let result;
-        const userId = req.user.userId;
-        if (req.user !== 0 && userId) {
-            result = await pool.query('SELECT * FROM events WHERE "is_private" = false OR ("is_private" = true AND "admin_id" = $1)', [userId]);
-        } else {
-            result = await pool.query('SELECT * FROM events WHERE "is_private" = false');
-        }
-  
+        let result = await pool.query('SELECT * FROM events WHERE "is_private" = false');
         if (result.rows.length > 0) {
             res.json({ events: result.rows });
         } else {
-            res.status(404).json({ error: 'No events were found' });
+            res.json({ });
         }
     } catch (err) {
         res.status(500).json({ error: err.message });

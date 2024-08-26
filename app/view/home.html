@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/opencagedata/leaflet-opencage-geocoding@v2.0.0/dist/css/L.Control.OpenCageGeocoding.min.css" />
     <script src="https://cdn.jsdelivr.net/gh/opencagedata/leaflet-opencage-geocoding@v2.0.0/dist/js/L.Control.OpenCageGeocoding.min.js"></script>
     
+    <script src="map.js" defer></script>
+
     <title>Events</title>
     <style>
         /* Add any other styles needed for your buttons */
@@ -145,7 +147,7 @@
     <!-- Container to hold the public events -->
     <div id="events-container"></div>
 
-    <script src="map.js" defer></script>
+
 
     <script>
         // Function to toggle the notifications sidebar
@@ -201,6 +203,7 @@
         async function fetchGeocode(address) {
             try {
                 const encodeAddress = encodeURIComponent(address);
+                console.log(encodeAddress);
                 const response = await fetch(`/api/geocode?address=${encodeAddress}`);
                 if(!response.ok) {
                     throw new Error('Failed to fetch geocode');
@@ -271,6 +274,7 @@
                 container.appendChild(eventElement);
 
                 if(geocode) {
+                    console.log(mapId, geocode.lat, geocode.lng, address, eventName);
                     createMap(mapId, geocode.lat, geocode.lng, address, eventName);
                 }
             };
