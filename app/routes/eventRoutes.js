@@ -63,7 +63,6 @@ router.get('/:eventId/comments', async (req, res) => {
 }});
 
 router.get('/getprivate', authMiddleware, async (req, res) => {
-  console.log("ponge");
   try {
     const userId = req.user.userId;
 
@@ -76,7 +75,7 @@ router.get('/getprivate', authMiddleware, async (req, res) => {
     if (result.rows.length > 0) {
         res.json({ events: result.rows });
     } else {
-        res.status(404).json({ error: 'No private events found' });
+      res.json({});
     }
 } catch (err) {
     res.status(500).json({ error: err.message });

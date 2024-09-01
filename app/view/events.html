@@ -124,6 +124,17 @@
         margin: 0;
     }
 
+    #eventList li, #publicEventList li, #privateEventList li {
+        padding: 20px;
+        margin-bottom: 15px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-left: 5px solid #4CAF50;
+        transition: transform 0.3s ease;
+        cursor: pointer; /* Add this line to change the cursor to a pointer */
+    }
+
     #eventList li {
         padding: 20px;
         margin-bottom: 15px;
@@ -134,7 +145,8 @@
         transition: transform 0.3s ease;
     }
 
-    #eventList li:hover {
+
+    #eventList li:hover, #publicEventList li:hover, #privateEventList li:hover {
         transform: translateY(-5px);
     }
 
@@ -246,19 +258,36 @@
         display: block;
     }
 
-        .deleteBtn {
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            padding: 5px 10px;
-            margin-top: 10px;
-        }
+    .deleteBtn {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        padding: 5px 10px;
+        margin-top: 10px;
+    }
 
-        .deleteBtn:hover {
-            background-color: #c0392b;
-        }
+    .deleteBtn:hover {
+        background-color: #c0392b;
+    }
+
+    .no-events-message {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        padding: 10px; /* Add some padding inside the element */
+        font-size: 16px; /* Adjust font size if needed */
+        color: #555; /* Optional: Change color to fit your theme */
+        border: 1px solid #4CAF50; /* Light gray border */
+        border-radius: 8px; /* Rounded corners */
+        background-color: #f9f9f9; /* Light background color */
+        width: fit-content; /* Adjust width to fit the content */
+        margin-left: auto;
+        margin-right: auto; /* Center the element horizontally */
+    }
+
+
 
     </style>
 </head>
@@ -293,16 +322,6 @@
                 <label for="eventPrivate">Private Event:</label>
                 <input type="checkbox" id="eventPrivate" name="eventPrivate"><br><br>
                 <input type="submit" value="Submit">
-            </form>
-        </div>
-
-        <div id="inviteFormContainer" style="display:none;">
-            <h3>Invite Users to Private Event</h3>
-            <form id="inviteUserForm">
-                <label for="inviteUsername">Username:</label>
-                <input type="text" id="inviteUsername" name="inviteUsername" required>
-                <input type="hidden" id="eventId" name="eventId">
-                <button type="submit">Invite</button>
             </form>
         </div>
 
@@ -372,59 +391,99 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Function to fetch and display events
 
     async function fetchEvents(url, listId, isPrivate) {
-        console.log(url);
+    const email = getCookie('user_email');
+    let id;
+    
+    if (email) {
         try {
-            const response = await fetch(url);
+            const response = await fetch(`/api/account/userIdThroughEmail?email=${encodeURIComponent(email)}`, {
+                method: 'GET',
+            });
+
             if (!response.ok) {
-                throw new Error('Failed to fetch events');
+                throw new Error('Network response was not ok');
             }
+
             const data = await response.json();
+            id = data.userId; // Adjust based on the actual response structure
+            console.log('User ID:', id);
+        } catch (error) {
+            console.error('Error fetching the user ID:', error);
+        }
+    } else {
+        id = undefined;
+    }
 
-            if (!data.events || !Array.isArray(data.events)) {
-                throw new Error('Invalid events data');
-            }
+    console.log(url);
+    try {
+        const response = await fetch(url);
+        console.log("response: ", response);
+        if (!response.ok) {
+            throw new Error('Failed to fetch events');
+        }
+        const data = await response.json();
 
-            const eventList = document.getElementById(listId);
-            eventList.innerHTML = '';
+        const eventList = document.getElementById(listId);
+        eventList.innerHTML = '';
+        
+        if (!data.events || data.events.length === 0) {
+            const newEvent = document.createElement('a');
+            newEvent.classList.add('no-events-message');
+            newEvent.innerHTML = "No events posted. Stay tuned!";
+            eventList.appendChild(newEvent);
+        } else {
             data.events.forEach(event => {
                 if (event.is_private === isPrivate) {
                     const newEvent = document.createElement('li');
                     newEvent.id = `event-${event.id}`;
+                    
+                    let deleteButtonHTML = '';
+
+                    // Check if the logged-in user is the admin of the post
+                    if (id === event.admin_id) { // Replace with actual admin ID check
+                        deleteButtonHTML = `<button class="deleteBtn" data-event-id="${event.id}">Delete</button>`;
+                    }
 
                     newEvent.innerHTML = `
-                        <div class="eventDetails">
+                        <div class="eventDetails" data-event-id="${event.id}">
                             <span class="eventName">${event.event_name}</span>
-                            <span class="eventDate">${new Date(event.event_date).toLocaleDateString()} at ${new Date(event.event_date).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</span>
+                            <span class="eventDate">${new Date(event.event_date).toLocaleDateString()} at ${new Date(event.event_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             <div class="eventDescription">${event.description}</div>
-                            <button class="deleteBtn" data-event-id="${event.id}">Delete</button>
-                            ${event.is_private ? `<button class="inviteBtn" data-event-id="${event.id}">Invite Users</button>` : ''}
+                            ${deleteButtonHTML}
                         </div>
                     `;
+
+                    // Append the new event to the list
                     eventList.appendChild(newEvent);
 
-                    const deleteBtn = newEvent.querySelector('.deleteBtn');
-                    deleteBtn.addEventListener('click', async function() {
-                        const eventId = this.getAttribute('data-event-id');
-                        if (confirm('Are you sure you want to delete this event?')) {
-                            await deleteEvent(eventId);
-                        }
-                    });
-
-                    // Handle inviting users (only if the event is private)
-                    if (event.is_private) {
-                        const inviteBtn = newEvent.querySelector('.inviteBtn');
-                        inviteBtn.addEventListener('click', function() {
-                            const eventId = this.getAttribute('data-event-id');
-                            document.getElementById('eventId').value = eventId; // Set the event ID in the invite form
-                            document.getElementById('inviteFormContainer').style.display = 'block'; // Show the invite form
+                    // Attach event listener to event details
+                    const eventDetails = newEvent.querySelector('.eventDetails');
+                    if (eventDetails) {
+                        eventDetails.addEventListener('click', function() {
+                            const eventID = this.getAttribute('data-event-id');
+                            window.location.href = `/event/${eventID}`;
                         });
                     }
+
+                    // Attach event listeners to delete buttons
+                    const deleteBtns = newEvent.querySelectorAll('.deleteBtn');
+                    deleteBtns.forEach(button => {
+                        button.addEventListener('click', async function(event) {
+                            event.stopPropagation();
+                            const eventId = this.getAttribute('data-event-id');
+                            if (confirm('Are you sure you want to delete this event?')) {
+                                await deleteEvent(eventId);
+                            }
+                        });
+                    });
                 }
             });
-        } catch (error) {
-            console.error('Error fetching events:', error);
         }
+    } catch (error) {
+        console.error('Error fetching events:', error);
     }
+}
+
 
     async function deleteEvent(eventId) {
         try {
@@ -512,32 +571,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
 
-    document.getElementById('inviteUserForm').addEventListener('submit', async function(event) {
-        event.preventDefault();
-
-        const username = document.getElementById('inviteUsername').value;
-        const eventId = document.getElementById('eventId').value;
-
-        try {
-            const response = await fetch('/api/events/inviteUser', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, eventId })
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                alert(`User invited successfully! Invitation link: ${result.invitationLink}`);
-            } else {
-                const errorResult = await response.json();
-                alert(`Failed to invite user: ${errorResult.error}`);
-            }
-        } catch (error) {
-            console.error('Error inviting user:', error);
-        }
-    });
 
     // Handle tab switching
     const tabs = document.querySelectorAll('.tab');
