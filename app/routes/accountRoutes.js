@@ -66,7 +66,7 @@ router.post('/register', async (req, res) => {
             const user = result.rows[0];
             const match = await bcrypt.compare(password, user.hashed_password);
             if (match) {
-                const token = jwt.sign({ userId: user.id }, env.session_key, { expiresIn: '1h' });
+                const token = jwt.sign({ userId: user.id, email: user.email }, env.session_key, { expiresIn: '1h' });
                 // Set both the token and email in cookies
                 res.cookie('token', token, {
                     httpOnly: true,
