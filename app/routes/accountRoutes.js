@@ -101,8 +101,25 @@ router.get('/auth/facebook/callback',
     passport.authenticate('facebook', { failureRedirect: '/login' }),
     async (req, res) => {
         try {
-            console.log('Params from fbAuth:', Object.keys(req));
+            const email = req.user.email;
+            const id = req.user.id;
+            console.log("about to hash");
+            const hashedPassword = await bcrypt.hash('social_login', 10);
 
+            // Generate a session token
+            console.log("creating session token");
+            const token = jwt.sign({ userId: id, email: email }, env.session_key, { expiresIn: '1h' });
+
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: true // Change to true if using HTTPS
+            });
+            res.cookie('user_email', email, {
+                httpOnly: false, // Make sure it's not httpOnly if you want to access it from JavaScript
+                secure: true, // Set to true if using HTTPS
+                path: '/' // Ensure it's available throughout the site
+            });
+            await pool.query('UPDATE users SET session_token = $1 WHERE id = $2', [token, id]);
             res.redirect('/');
         } catch (error) {
             console.error('Error in Facebook callback:', error);

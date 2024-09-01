@@ -18,24 +18,21 @@ passport.use(new FacebookStrategy({
 },
     async (accessToken, refreshToken, profile, done) => {
         try {
-            const { id, emails, name } = profile;
+            const { id, username, emails, name } = profile;
             console.log("profile:\n", profile);
             const email = emails && emails.length > 0 ? emails[0].value : null;
             const firstName = name?.givenName || '';
             const lastName = name?.familyName || '';
 
-            // Generate a username (this could be more sophisticated)
-            let username = `${firstName}.${lastName}`.toLowerCase();
-            if (!firstName || !lastName) {
-                username = `user_${id}`;
+            // Generate a username if not set (this could be more sophisticated)
+
+            if (!username) {
+                if (!firstName || !lastName) {
+                  let username = `user_${id}`;
+                } else {
+                  let username = `${firstName}.${lastName}`.toLowerCase();
+                }
             }
-
-            console.log("about to hash");
-            const hashedPassword = await bcrypt.hash('social_login', 10);
-
-            // Generate a session token
-            console.log("creating session token");
-            const sessionToken = jwt.sign({ email }, env.session_key, { expiresIn: '1h' });
 
             // Check if the user already exists in the database
             let user = await db.query('SELECT * FROM users WHERE facebook_id = $1 OR email = $2', [id, email]);
@@ -45,7 +42,7 @@ passport.use(new FacebookStrategy({
                 user = await db.query(
                     `INSERT INTO users (facebook_id, first_name, last_name, email, username, hashed_password, address, session_token, email_opt_in) 
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-                    [id, firstName, lastName, email, username, hashedPassword, '', sessionToken, false]
+                    [id, firstName, lastName, email, username, '', '', '', false]
                 );
                 user = user.rows[0];
                 console.log("User created successfully:\n", user);
@@ -61,7 +58,7 @@ passport.use(new FacebookStrategy({
 ));
 
 passport.serializeUser((user, done) => {
-  if (user && user.id) {
+if (user && user.id) {
     done(null, user.id);
   } else {
     done(new Error('User ID is missing for serialization'));
