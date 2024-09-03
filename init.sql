@@ -36,13 +36,13 @@ CREATE TABLE IF NOT EXISTS "tags" (
 );
 
 CREATE TABLE IF NOT EXISTS "private_event_members" (
-	"user_id" bigint NOT NULL UNIQUE,
-	"event_id" bigint NOT NULL UNIQUE
+	"user_id" bigint NOT NULL,
+	"event_id" bigint NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "event_registrants" (
-	"event_id" bigint NOT NULL UNIQUE,
-	"user_id" bigint NOT NULL UNIQUE
+	"event_id" bigint NOT NULL,
+	"user_id" bigint NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "comments" (

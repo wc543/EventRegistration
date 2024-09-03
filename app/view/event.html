@@ -45,7 +45,10 @@
 
 
         <script>
-            async function loadEvent() {
+
+        async function loadEvent() {
+        const email = getCookie('user_email'); 
+        let userId = await getUserId(email);
         // Get the event ID from the URL
         let eventId = window.location.pathname.split('/').pop();
 
@@ -69,11 +72,8 @@
 
                 try {
                     if(event.yt_link) {
-                        console.log('YouTube link:', event.yt_link);
                         const url = new URL(event.yt_link);
-                        console.log("URL: ", url);
                         const videoId = url.searchParams.get('v');
-                        console.log("videoId: ", videoId);
                         if (videoId) {
                             videoUrl = await fetchVideo(videoId)
                         } else {
@@ -88,7 +88,6 @@
                 }
 
                 async function fetchVideo(videoId) {
-                    console.log("videoIdINSIDE: ", videoId);
                     try {
                         const response = await fetch(`/api/video/${videoId}`);
                         if (!response.ok) {
@@ -111,21 +110,32 @@
                     <p>${event.description}</p>
                     <p><strong>Date:</strong> ${new Date(event.event_date).toLocaleDateString()}</p>
                     <p><strong>Location:</strong> ${event.address}</p>
-                    <p><strong>YouTube Link:</strong> <a href="${event.yt_link}" target="_blank">${event.yt_link}</a></p>
                     <div id="${mapId}" class="map-container"></div>
-                    ${event.is_private ? `<button class="inviteBtn" data-event-id="${event.id}">Invite Users</button>` : ''}
+                    ${(event.is_private && userId === event.admin_id)? `<button class="inviteBtn" data-event-id="${event.id}">Invite Users</button>` : ''}
                 
 
                     ${videoUrl ? `
                         <p><strong>YouTube Video:</strong></p>
                         <iframe width="720" height="400" src="${videoUrl}" frameborder="0" allowfullscreen></iframe>
                         ` : `<p><strong>YouTube Video:</strong></p>`}
+
+                    <div class="comments">
+                        <h4>Comments</h4>
+                        <form class="comment-form-${event.id}" id="comment-form-${event.id}" data-event-id="${event.id}">
+                            <input type="text" name="comment" placeholder="Add comment" required>
+                            <button type="submit">Post</button>
+                        </form>
+                        <div class="comments-list-${event.id}"></div>
+                    </div>
                 `;
                 fetchComments(eventId);
                 if(geocode) {
                     console.log(mapId, geocode.lat, geocode.lng, event.address, event.event_name);
                     createMap(mapId, geocode.lat, geocode.lng, event.address, event.event_name);
                 }
+                
+
+                
                 const form = document.getElementById(`comment-form-${event.id}`);
 
                 if (form) {
@@ -156,7 +166,10 @@
         } catch (error) {
             console.error('Error fetching event:', error);
         }
+        inviteUserSubmission();
 
+
+    function inviteUserSubmission(){
         document.getElementById('inviteUserForm').addEventListener('submit', async function(event) {
         event.preventDefault();
 
@@ -182,11 +195,37 @@
         } catch (error) {
             console.error('Error inviting user:', error);
         }
-
-
-        
     });
+    }
 
+    async function getUserId(email) {
+        if (email) {
+            try {
+                const response = await fetch(`/api/account/userIdThroughEmail?email=${encodeURIComponent(email)}`, {
+                    method: 'GET',
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                console.log('User ID:', data.userId);
+                return data.userId;
+            } catch (error) {
+                console.error('Error fetching the user ID:', error);
+                return undefined; // Return undefined if there's an error
+            }
+        } else {
+            return undefined;
+        }
+    }
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
+    }
 
     async function fetchGeocode(address) {
             try {

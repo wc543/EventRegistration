@@ -96,6 +96,32 @@ router.get('/auth/facebook',
     passport.authenticate('facebook', { scope: ['email'] })
 );
 
+
+router.get('/user/:id', async (req, res) => {
+    try {
+        const id = req.params.id; // Correctly accessing query parameters
+
+        if (!id) {
+            return res.status(400).json({ error: "ID is required" });
+        }
+
+        const existingUser = await pool.query(
+            'SELECT * FROM users WHERE id = $1',
+            [id]
+        );
+
+        if (existingUser.rows.length > 0) {
+            const user = existingUser.rows[0];
+            res.json({ user });
+        } else {
+            res.status(404).json({ error: "User not found" });
+        }
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
 // Callback URL that Facebook redirects to after authentication
 router.get('/auth/facebook/callback',
     passport.authenticate('facebook', { failureRedirect: '/login' }),
@@ -180,30 +206,7 @@ router.get('/auth/facebook/callback',
     }
 });
 
-router.get('/user', async (req, res) => {
-    try {
-        const { id } = req.query; // Correctly accessing query parameters
 
-        if (!id) {
-            return res.status(400).json({ error: "ID is required" });
-        }
-
-        const existingUser = await pool.query(
-            'SELECT * FROM users WHERE id = $1',
-            [id]
-        );
-
-        if (existingUser.rows.length > 0) {
-            const user = existingUser.rows[0];
-            res.json({ user });
-        } else {
-            res.status(404).json({ error: "User not found" });
-        }
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ error: "Server error" });
-    }
-});
 
 
 

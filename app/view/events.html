@@ -287,6 +287,36 @@
         margin-right: auto; /* Center the element horizontally */
     }
 
+    .registerBtn {
+        background-color: green; /* Green background */
+        color: white;            /* White text */
+        border: none;            /* No border */
+        padding: 10px 20px;      /* Padding for better appearance */
+        margin: 5px;             /* Margin for spacing */
+        border-radius: 5px;      /* Rounded corners */
+        cursor: pointer;         /* Pointer cursor on hover */
+        font-size: 16px;         /* Font size */
+    }
+
+    .registerBtn:hover {
+        background-color: darkgreen; /* Darker green on hover */
+    }
+
+    /* Styles for the unregister button */
+    .unregisterBtn {
+        background-color: white; /* Light gray background */
+        color: black;                /* Black text */
+        border: 2px solid green;     /* Green border */
+        padding: 10px 20px;          /* Padding for better appearance */
+        margin: 5px;                 /* Margin for spacing */
+        border-radius: 5px;          /* Rounded corners */
+        cursor: pointer;             /* Pointer cursor on hover */
+        font-size: 16px;             /* Font size */
+    }
+
+    .unregisterBtn:hover {
+        background-color: gray;      /* Gray background on hover */
+    }
 
 
     </style>
@@ -391,33 +421,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Function to fetch and display events
 
     async function fetchEvents(url, listId, isPrivate) {
-    const email = getCookie('user_email');
-    let id;
-    
-    if (email) {
-        try {
-            const response = await fetch(`/api/account/userIdThroughEmail?email=${encodeURIComponent(email)}`, {
-                method: 'GET',
-            });
+    let userId = await getUserId(email);
 
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            const data = await response.json();
-            id = data.userId; // Adjust based on the actual response structure
-            console.log('User ID:', id);
-        } catch (error) {
-            console.error('Error fetching the user ID:', error);
-        }
-    } else {
-        id = undefined;
-    }
-
-    console.log(url);
     try {
         const response = await fetch(url);
-        console.log("response: ", response);
+        console.log(response);
         if (!response.ok) {
             throw new Error('Failed to fetch events');
         }
@@ -432,16 +440,54 @@ document.addEventListener('DOMContentLoaded', async function() {
             newEvent.innerHTML = "No events posted. Stay tuned!";
             eventList.appendChild(newEvent);
         } else {
-            data.events.forEach(event => {
+            for (const event of data.events) {
                 if (event.is_private === isPrivate) {
+                    // Fetch admin user data
+                    let adminUsername = 'Loading...';
+                    try {
+                        const adminData = await getUser(event.admin_id);
+                        adminUsername = adminData.user.username;
+                        console.log(adminData)
+                    } catch (error) {
+                        console.error(`Error fetching admin data for event ${event.id}:`, error);
+                    }
+
                     const newEvent = document.createElement('li');
                     newEvent.id = `event-${event.id}`;
+
+                    let registered = false;
                     
+                    if (userId) {
+                        try {
+                            const regResponse = await fetch(`/api/events/isRegistered/${event.id}/${userId}`);
+                            if (!regResponse.ok) {
+                                throw new Error(`Error: ${regResponse.status} ${regResponse.statusText}`);
+                            }
+                            const regData = await regResponse.json();
+                            registered = regData.registered;
+                        } catch (error) {
+                            console.error('Error fetching registration status:', error);
+                        }
+                    }
+
+                    let actionButtonsHTML = '';
                     let deleteButtonHTML = '';
 
-                    // Check if the logged-in user is the admin of the post
-                    if (id === event.admin_id) { // Replace with actual admin ID check
-                        deleteButtonHTML = `<button class="deleteBtn" data-event-id="${event.id}">Delete</button>`;
+                    if (userId) {
+                        if (userId === event.admin_id) {
+                            // Admins should not see register/unregister buttons
+                            actionButtonsHTML = '';
+                        } else {
+                            // Non-admins see both buttons
+                            actionButtonsHTML = `
+                                <button class="registerBtn" data-event-id="${event.id}">Register</button>
+                                <button class="unregisterBtn" data-event-id="${event.id}">Unregister</button>
+                            `;
+                        }
+
+                        if (userId === event.admin_id) {
+                            deleteButtonHTML = `<button class="deleteBtn" data-event-id="${event.id}">Delete</button>`;
+                        }
                     }
 
                     newEvent.innerHTML = `
@@ -449,23 +495,50 @@ document.addEventListener('DOMContentLoaded', async function() {
                             <span class="eventName">${event.event_name}</span>
                             <span class="eventDate">${new Date(event.event_date).toLocaleDateString()} at ${new Date(event.event_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             <div class="eventDescription">${event.description}</div>
+                            <div class="eventAdmin">Admin: ${adminUsername}</div>
+                            ${actionButtonsHTML}
                             ${deleteButtonHTML}
                         </div>
                     `;
 
-                    // Append the new event to the list
                     eventList.appendChild(newEvent);
 
-                    // Attach event listener to event details
                     const eventDetails = newEvent.querySelector('.eventDetails');
-                    if (eventDetails) {
-                        eventDetails.addEventListener('click', function() {
-                            const eventID = this.getAttribute('data-event-id');
-                            window.location.href = `/event/${eventID}`;
-                        });
+                    eventDetails.addEventListener('click', function() {
+                        const eventID = this.getAttribute('data-event-id');
+                        window.location.href = `/event/${eventID}`;
+                    });
+
+                    if (actionButtonsHTML) {
+                        const registerBtn = newEvent.querySelector('.registerBtn');
+                        const unregisterBtn = newEvent.querySelector('.unregisterBtn');
+
+                        if (registerBtn && unregisterBtn) {
+                            // Hide the unregister button if the user is not registered
+                            unregisterBtn.style.display = registered ? 'inline' : 'none';
+                            // Hide the register button if the user is registered
+                            registerBtn.style.display = registered ? 'none' : 'inline';
+
+                            registerBtn.addEventListener('click', async function(event) {
+                                event.stopPropagation();
+                                const eventId = this.getAttribute('data-event-id');
+                                await registerForEvent(eventId, userId);
+                                // Update button visibility
+                                registerBtn.style.display = 'none';
+                                unregisterBtn.style.display = 'inline';
+                            });
+
+                            unregisterBtn.addEventListener('click', async function(event) {
+                                event.stopPropagation();
+                                const eventId = this.getAttribute('data-event-id');
+                                await unregisterFromEvent(eventId, userId);
+                                // Update button visibility
+                                unregisterBtn.style.display = 'none';
+                                registerBtn.style.display = 'inline';
+                            });
+                        }
                     }
 
-                    // Attach event listeners to delete buttons
                     const deleteBtns = newEvent.querySelectorAll('.deleteBtn');
                     deleteBtns.forEach(button => {
                         button.addEventListener('click', async function(event) {
@@ -477,12 +550,81 @@ document.addEventListener('DOMContentLoaded', async function() {
                         });
                     });
                 }
-            });
+            }
         }
     } catch (error) {
         console.error('Error fetching events:', error);
     }
 }
+
+
+
+    async function getUserId(email) {
+        if (email) {
+            try {
+                const response = await fetch(`/api/account/userIdThroughEmail?email=${encodeURIComponent(email)}`, {
+                    method: 'GET',
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                console.log('User ID:', data.userId);
+                return data.userId;
+            } catch (error) {
+                console.error('Error fetching the user ID:', error);
+                return undefined; // Return undefined if there's an error
+            }
+        } else {
+            return undefined;
+        }
+    }
+
+
+    async function registerForEvent(eventId, userId) {
+        try {
+            const response = await fetch('/api/events/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ eventId, userId })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to register for event');
+            }
+
+            const data = await response.json();
+            console.log('Successfully registered:', data);
+        } catch (error) {
+            console.error('Error during registration:', error);
+        }
+    }
+
+    async function unregisterFromEvent(eventId, userId) {
+        try {
+            const response = await fetch('/api/events/unregister', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ eventId, userId })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to unregister from event');
+            }
+
+            const data = await response.json();
+            console.log('Successfully unregistered:', data);
+        } catch (error) {
+            console.error('Error during unregistration:', error);
+        }
+    }
+
 
 
     async function deleteEvent(eventId) {
@@ -584,6 +726,25 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     });
 });
+
+async function getUser(id) {
+    try {
+        const response = await fetch(`/api/account/user/${id}`, {
+            method: 'GET',
+        });
+
+        if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        throw error; // Re-throw the error to be handled by the caller if needed
+    }
+}
+
     </script>
 </body>
 </html>

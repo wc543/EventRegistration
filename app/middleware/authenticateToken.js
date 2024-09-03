@@ -2,8 +2,8 @@ const jwt = require('jsonwebtoken');
 const env = require('../../env.json'); // Adjust the path as needed
 
 const authenticateToken = (req, res, next) => {
+  console.log("In authToken");
   const token = req.cookies.token || req.headers['authorization']?.split(' ')[1];
-  
   if (!token) {
     req.user = 0; // Set user to 0 if no token is provided
     return next(); // Proceed to the next middleware or route handler

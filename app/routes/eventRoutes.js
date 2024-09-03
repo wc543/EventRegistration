@@ -31,38 +31,10 @@ router.post('/create', authMiddleware, async (req, res) => {
     }
   });
   
-router.post('/:eventId/comments', authMiddleware, async (req, res) => {
-  const { eventId } = req.params;
-  const { body, created_at } = req.body;
-  const poster_id = req.user.userId;
 
-  try {
-    const result = await pool.query(
-      `INSERT INTO comments("body", "poster_id", "event_id", "created_at")
-      VALUES ($1, $2, $3, $4) RETURNING id;`,
-      [body, poster_id, eventId, created_at]
-    );
-    res.status(201).json({ commentId: result.rows[0].id });
-  } catch (err) {
-    console.error('Error executing query:', err.message, err.stack);
-    res.status(500).json({ error: err.message });
-}});
-
-
-router.get('/:eventId/comments', async (req, res) => {
-  const { eventId } = req.params;
-  try {
-    const result = await pool.query(
-      `SELECT * FROM comments WHERE "event_id" = $1 ORDER BY created_at ASC;`,
-      [eventId]
-    );
-    res.json(result.rows);
-  } catch (err) {
-    console.error('Error executing query:', err.message, err.stack);
-    res.status(500).json({ error: err.message });
-}});
 
 router.get('/getprivate', authMiddleware, async (req, res) => {
+  console.log("In getprivate");
   try {
     const userId = req.user.userId;
 
@@ -78,6 +50,7 @@ router.get('/getprivate', authMiddleware, async (req, res) => {
       res.json({});
     }
 } catch (err) {
+    console.error("Error fetching private events:", err);
     res.status(500).json({ error: err.message });
 }
 });
@@ -174,51 +147,110 @@ router.get('/getprivate', authMiddleware, async (req, res) => {
     }
   });
 
-
-  
-  router.get('/:id', async (req, res) => {
-    const eventId = req.params.id;
+  router.get('/isRegistered/:eventid/:userid', async (req, res) => {
+    const eventId = req.params.eventid;
+    const userId = req.params.userid;
   
     try {
-        const result = await pool.query('SELECT * FROM events WHERE "id" = $1', [eventId]);
-        const event = result.rows[0]; // Extract the first row from the result
+        // Check in event_registrants table
+        const result = await pool.query(
+            'SELECT * FROM event_registrants WHERE "event_id" = $1 AND "user_id" = $2',
+            [eventId, userId]
+        );
+        const isRegistered = result.rowCount > 0; // Check if any row is returned
   
-        if (event) {
-            res.json(event);
+        if (isRegistered) {
+            res.json({ registered: true });
         } else {
-            res.status(404).json({ message: 'Event not found' });
+            res.json({ registered: false });
         }
     } catch (error) {
-        console.error('Error fetching event details:', error);
+        console.error('Error checking registration:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
   });
-  
-// In eventRoutes.js
-router.delete('/:eventId', authMiddleware, async (req, res) => {
-  const { eventId } = req.params;
-  const userId = req.user.userId;
 
-  try {
-      // Verify if the event exists and the user is the creator
-      const event = await pool.query('SELECT * FROM events WHERE id = $1 AND admin_id = $2', [eventId, userId]);
+  router.post('/register', async (req, res) => {
+      const { eventId, userId } = req.body;
 
-      if (event.rows.length === 0) {
-          return res.status(403).json({ error: 'You do not have permission to delete this event' });
+      if (!eventId || !userId) {
+          return res.status(400).json({ message: 'Event ID and User ID are required.' });
       }
 
-      await pool.query('DELETE FROM private_event_members WHERE event_id = $1', [eventId]);
-      await pool.query('DELETE FROM comments WHERE event_id = $1', [eventId]);
-      await pool.query('DELETE FROM pending_invitation WHERE event_id = $1', [eventId]);
-      await pool.query('DELETE FROM notifications WHERE event_id = $1', [eventId]);
+      try {
+          // Check if the user is already registered
+          const checkResult = await pool.query(
+              'SELECT * FROM event_registrants WHERE "event_id" = $1 AND "user_id" = $2',
+              [eventId, userId]
+          );
 
-      // Proceed to delete the event
-      await pool.query('DELETE FROM events WHERE id = $1', [eventId]);
-      res.status(200).json({ message: 'Event deleted successfully' });
-  } catch (err) {
-      console.error('Error deleting event:', err.message);
-      res.status(500).json({ error: 'Internal server error' });
+          if (checkResult.rowCount > 0) {
+              return res.json({ registered: true, message: 'User is already registered.' });
+          }
+
+          // If not registered, add the user to the event_registrants table
+          const insertResult = await pool.query(
+              'INSERT INTO event_registrants ("event_id", "user_id") VALUES ($1, $2) RETURNING *',
+              [eventId, userId]
+          );
+
+          res.json({ registered: true, message: 'User successfully registered.', registration: insertResult.rows[0] });
+      } catch (error) {
+          console.error('Error during registration:', error);
+          res.status(500).json({ message: 'Internal server error' });
+      }
+  });
+
+  router.post('/unregister', async (req, res) => {
+    const { eventId, userId } = req.body;
+
+    if (!eventId || !userId) {
+        return res.status(400).json({ message: 'Event ID and User ID are required.' });
+    }
+
+    try {
+        // Check if the user is registered
+        const checkResult = await pool.query(
+            'SELECT * FROM event_registrants WHERE "event_id" = $1 AND "user_id" = $2',
+            [eventId, userId]
+        );
+
+        if (checkResult.rowCount === 0) {
+            return res.json({ registered: false, message: 'User is not registered for this event.' });
+        }
+
+        // Remove the registration
+        const deleteResult = await pool.query(
+            'DELETE FROM event_registrants WHERE "event_id" = $1 AND "user_id" = $2 RETURNING *',
+            [eventId, userId]
+        );
+
+        res.json({ registered: false, message: 'User successfully unregistered.', unregistered: deleteResult.rows[0] });
+    } catch (error) {
+        console.error('Error during unregistration:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+
+router.get('/:id', async (req, res) => {
+  const eventId = req.params.id;
+
+  try {
+      const result = await pool.query('SELECT * FROM events WHERE "id" = $1', [eventId]);
+      const event = result.rows[0]; // Extract the first row from the result
+
+      if (event) {
+          res.json(event);
+      } else {
+          res.status(404).json({ message: 'Event not found' });
+      }
+  } catch (error) {
+      console.error('Error fetching event details:', error);
+      res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+
 
 module.exports = router;

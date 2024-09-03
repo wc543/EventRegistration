@@ -19,11 +19,11 @@ li a {
 }
 
 .event {
-    border: 1px solid #ccc;
-    padding: 15px;
-    margin-bottom: 10px;
+    background-color: white;
     border-radius: 5px;
-    background-color: #f9f9f9;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 10px 0;
 }
 
 .event h3 {
@@ -63,7 +63,11 @@ li a {
 
 /* Ensure the body doesn't allow horizontal scrolling */
 body {
-    overflow-x: hidden;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    margin: 0;
+    padding: 0;
 }
 
 #notifications-button {
@@ -117,4 +121,72 @@ body {
 .map-container {
     height: 500px;
     width: 500px;
+}
+
+.navbar {
+    background-color: #333;
+    padding: 10px;
+}
+
+.nav-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: space-around;
+}
+
+.nav-item {
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+}
+
+.nav-item:hover {
+    background-color: #555;
+}
+
+.page-title {
+    text-align: center;
+    margin: 20px 0;
+    color: #333;
+}
+
+.section-title {
+    font-size: 1.5em;
+    margin: 10px 0;
+    text-align: center;
+}
+
+.sidebar {
+    display: none;
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 300px;
+    height: 100%;
+    background-color: white;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.sidebar.active {
+    display: block;
+}
+
+.btn {
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #555;
+}
+
+.events-container {
+    margin: 20px;
 }
