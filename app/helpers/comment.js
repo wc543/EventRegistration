@@ -1,41 +1,57 @@
-function createCommentElement(comment) {
-    const commentElement = document.createElement('div');
-    commentElement.classList.add('comment');
-    
-    const commentBody = document.createElement('p');
-    commentBody.textContent = `${comment.poster_id}: ${comment.body}`;
-    commentElement.appendChild(commentBody);
-    
-    const commentDate = document.createElement('small');
-    commentDate.textContent = new Date(comment.created_at).toLocaleString();
-    commentElement.appendChild(commentDate);
-    
-    return commentElement;
-}
-
-async function fetchComments(eventId){
+async function fetchComments(eventId) {
     try {
-        if(!eventId){
-            throw Error('No event ID found');
+        if (!eventId) {
+            throw new Error('No event ID found');
         }
+
         const response = await fetch(`/api/comments/${eventId}`);
 
-        if(!response.ok){
-            throw Error('Failed to fetch comments');
+        if (!response.ok) {
+            throw new Error('Failed to fetch comments');
         }
-        
+
         const comments = await response.json();
         const commentList = document.querySelector(`.comments-list-${eventId}`);
 
-        if(commentList){
-            comments.forEach(comment => {
-                commentList.appendChild(createCommentElement(comment));
-            });
+        if (commentList) {
+            for (const comment of comments) {
+                // Fetch the user details
+                const userResponse = await fetch(`/api/account/user/${comment.poster_id}`);
+
+                if (!userResponse.ok) {
+                    throw new Error(`Failed to fetch user with ID ${comment.poster_id}`);
+                }
+
+                const val = await userResponse.json();
+                console.log(val.user);
+                const username = val.user.username;
+                console.log("comment, ", comment);
+
+                // Create a comment element with the username instead of user ID
+                commentList.appendChild(createCommentElement(comment, username));
+            }
         }
     } catch (err) {
         console.error('Error fetching comments: ', err);
     }
 }
+
+function createCommentElement(comment, username) {
+    console.log(comment, username);
+    const commentElement = document.createElement('div');
+    commentElement.className = 'comment';
+
+    commentElement.innerHTML = `
+        <p><strong>${username}</strong>: ${comment.body}</p>
+        <p><em>${new Date(comment.created_at).toLocaleString()}</em></p>
+    `;
+
+    return commentElement;
+}
+
+
+
+
 
 
 async function postComment(eventId, commentText) {
@@ -45,6 +61,13 @@ async function postComment(eventId, commentText) {
         }
         
         console.log("Attempting to post notification...");
+
+
+        let usernameResponse = await fetch(`/api/account/username`, {
+            method: 'GET'
+        });
+        let usernameBody = await usernameResponse.json();
+        let username = usernameBody.username;
 
         // Post notification
         const notificationResponse = await fetch(`/api/notifications/create`, {
@@ -84,7 +107,7 @@ async function postComment(eventId, commentText) {
 
         console.log("Comment posted successfully");
 
-        const comment = await response.json();
+        await response.json();
 
         // Create a new comment element
         const commentList = document.querySelector(`.comments-list-${eventId}`);
@@ -92,10 +115,9 @@ async function postComment(eventId, commentText) {
         if(commentList){
             // Append the new comment to the list immediately
             const commentElement = createCommentElement({
-                poster_id: 'You', 
                 body: commentText,
                 created_at: new Date().toISOString()
-            });
+            }, username);
             commentList.appendChild(commentElement);
         }
 

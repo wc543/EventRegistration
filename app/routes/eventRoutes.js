@@ -32,6 +32,60 @@ router.post('/create', authMiddleware, async (req, res) => {
   });
   
 
+router.get('/usersregistered', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        // First, get the event IDs from the event_registrants table
+        const registrantsResult = await pool.query(
+            'SELECT event_id FROM event_registrants WHERE user_id = $1', [userId]
+        );
+
+        // Extract event IDs and ensure they are in the correct format
+        const eventIds = registrantsResult.rows.map(row => row.event_id);
+
+        // Debugging: Log event IDs to verify they are correct
+        console.log("Event IDs:", eventIds);
+
+        if (eventIds.length > 0) {
+            // Fetch the events from the events table using the retrieved event IDs
+            const eventsResult = await pool.query(
+                'SELECT * FROM events WHERE id = ANY($1::bigint[])', [eventIds]
+            );
+
+            res.json({ events: eventsResult.rows });
+        } else {
+            // No events found for the user
+            res.json({ events: [] });
+        }
+    } catch (err) {
+        console.error("Error fetching user registered events:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+  router.get('/usersevents', authMiddleware, async (req, res) => {
+    try {
+      const userId = req.user.userId;
+  
+      // Fetch private events where the user is either the creator or an invited member
+      const result = await pool.query(
+          'SELECT * FROM events WHERE "admin_id" = $1', [userId]);
+  
+      if (result.rows.length > 0) {
+          res.json({ events: result.rows });
+      } else {
+        res.json({});
+      }
+  } catch (err) {
+      console.error("Error fetching user created events:", err);
+      res.json({});
+  }
+  });
+
+
+
+
 
 router.get('/getprivate', authMiddleware, async (req, res) => {
   console.log("In getprivate");

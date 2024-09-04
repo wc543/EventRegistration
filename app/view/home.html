@@ -24,16 +24,67 @@
     </style>
 </head>
 <body>
+
+    <div class="container">
+
+    
+        <ul class="nav">
+            <li><a href="/events">Events</a></li>
+            <li><a id="login-signup-button" href="login">Log In/Sign Up</a></li>
+            <li><a id="logout-button">Log Out</a></li>
+        </ul>
+        <h2>Home Page</h2>
+        <input type="text" id="searchBar" placeholder="Search events by name..." style="width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ccc;">
+        <div class="tab-container">
+            <div class="tab active" data-tab="your-events">Your Events</div>
+            <div class="tab" data-tab="registered-events">Registered Events</div>
+        </div>
+    
+        <div id="your-events" class="tab-content active">
+            <h3>Your Events</h3>
+            <ul id="yourEventList"></ul>
+        </div>
+        <div id="registered-events" class="tab-content">
+            <h3>Registered Events</h3>
+            <ul id="registeredEventList"></ul>
+        </div>
+        <!-- Notifications Button -->
+        <button id="notifications-button">Notifications</button>
+    
+        <!-- Notifications Sidebar -->
+        <div id="notifications-sidebar">
+            <h3>Notifications</h3>
+            <ul id="notifications-list">
+                <!-- Notifications will be dynamically added here -->
+            </ul>
+        </div>
+    
+        <!-- Container to hold the public events -->
+    
+    </div>
+
     <script>
         function getCookie(name) {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
             if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
         }
+            // Handle tab switching
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                tabs.forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
 
         document.addEventListener('DOMContentLoaded', async function()  {
             try {
-                const email = getCookie('user_email'); // Replace 'user_email' with the actual cookie name
+                const email = getCookie('user_email'); 
                 const loginSignupButton = document.getElementById('login-signup-button');
                 const logoutButton = document.getElementById('logout-button');
                 if (email) {
@@ -59,7 +110,7 @@
                 console.log("in th method");
                 let response = await fetch('/api/notifications/getall', {
                     method: 'GET',
-                    credentials: 'include' // Include cookies in the request
+                    credentials: 'include' 
                 });
 
                 if (!response.ok) {
@@ -121,32 +172,34 @@
     });
 }
 
+    searchBar.addEventListener('input', function() {
+        const searchTerm = searchBar.value.toLowerCase();
+
+        // Filter public events
+        filterEvents(document.getElementById("yourEventList"), searchTerm);
+
+        // Filter private events
+        filterEvents(document.getElementById("registeredEventList"), searchTerm);
+    });
+
+    function filterEvents(eventList, searchTerm) {
+        const events = eventList.querySelectorAll('li');
+        events.forEach(event => {
+            const eventName = event.querySelector('.eventName').textContent.toLowerCase();
+            if (eventName.includes(searchTerm)) {
+                event.style.display = ''; // Show event
+            } else {
+                event.style.display = 'none'; // Hide event
+            }
+        });
+    }
+
     </script>
 
-    <h1>Event Registration</h1>
-    <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/events">Events</a></li>
-        <li><a id="login-signup-button" href="login">Log In/Sign Up</a></li>
-        <li><a id="logout-button">Log Out</a></li>
-    </ul>
 
-    <h2>This is the home page</h2>
 
-    <!-- Notifications Button -->
-    <button id="notifications-button">Notifications</button>
 
-    <!-- Notifications Sidebar -->
-    <div id="notifications-sidebar">
-        <h3>Notifications</h3>
-        <ul id="notifications-list">
-            <!-- Notifications will be dynamically added here -->
-        </ul>
-    </div>
-
-    <!-- Container to hold the public events -->
-    <div id="events-container"></div>
-
+    
 
 
     <script>
@@ -180,7 +233,8 @@
                     throw new Error('Failed to fetch public events');
                 }
                 const data = await response.json();
-                displayEvents(data.events);
+                fetchEvents('/api/events/usersevents', 'yourEventList');
+                fetchEvents('/api/events/usersregistered', 'registeredEventList');
             } catch (error) {
                 console.error('Error:', error);
             }
@@ -216,70 +270,257 @@
             }
         }
 
-        // Function to create and display event elements
-        async function displayEvents(events) {
-            const container = document.getElementById('events-container');
-            container.innerHTML = ''; // Clear existing content
 
-            if (events.length === 0) {
-                container.innerHTML = '<p>No public events found.</p>';
-                return;
+
+        
+        async function fetchEvents(url, listId, isPrivate) {
+            let email = getCookie('user_email'); 
+            let userId = await getUserId(email);
+
+            try {
+                const response = await fetch(url, {
+                    method: 'GET', // Optional, as 'GET' is the default method
+                });
+                console.log(response);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch events');
+                }
+                const data = await response.json();
+                console.log("Event data: ", data);
+                const eventList = document.getElementById(listId);
+                eventList.innerHTML = '';
+                
+                if (!data.events || data.events.length === 0) {
+                    const newEvent = document.createElement('a');
+                    newEvent.classList.add('no-events-message');
+                    newEvent.innerHTML = "No events posted. Stay tuned!";
+                    eventList.appendChild(newEvent);
+                } else {
+                    for (const event of data.events) {
+
+                            // Fetch admin user data
+                            let adminUsername = 'Loading...';
+                            try {
+                                const adminData = await getUser(event.admin_id);
+                                adminUsername = adminData.user.username;
+                                console.log(adminData)
+                            } catch (error) {
+                                console.error(`Error fetching admin data for event ${event.id}:`, error);
+                            }
+
+                            const newEvent = document.createElement('li');
+                            newEvent.id = `event-${event.id}`;
+
+                            let registered = false;
+                            
+                            if (userId) {
+                                try {
+                                    const regResponse = await fetch(`/api/events/isRegistered/${event.id}/${userId}`);
+                                    if (!regResponse.ok) {
+                                        throw new Error(`Error: ${regResponse.status} ${regResponse.statusText}`);
+                                    }
+                                    const regData = await regResponse.json();
+                                    registered = regData.registered;
+                                } catch (error) {
+                                    console.error('Error fetching registration status:', error);
+                                }
+                            }
+
+                            let actionButtonsHTML = '';
+                            let deleteButtonHTML = '';
+
+                            if (userId) {
+                                if (userId === event.admin_id) {
+                                    // Admins should not see register/unregister buttons
+                                    actionButtonsHTML = '';
+                                } else {
+                                    // Non-admins see both buttons
+                                    actionButtonsHTML = `
+                                        <button class="registerBtn" data-event-id="${event.id}">Register</button>
+                                        <button class="unregisterBtn" data-event-id="${event.id}">Unregister</button>
+                                    `;
+                                }
+
+                                if (userId === event.admin_id) {
+                                    deleteButtonHTML = `<button class="deleteBtn" data-event-id="${event.id}">Delete</button>`;
+                                }
+                            }
+
+                            newEvent.innerHTML = `
+                                <div class="eventDetails" data-event-id="${event.id}">
+                                    <span class="eventName">${event.event_name}</span>
+                                    <span class="eventDate">${new Date(event.event_date).toLocaleDateString()} at ${new Date(event.event_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                    <div class="eventDescription">${event.description}</div>
+                                    <div class="eventAdmin">Admin: ${adminUsername}</div>
+                                    ${actionButtonsHTML}
+                                    ${deleteButtonHTML}
+                                </div>
+                            `;
+
+                            eventList.appendChild(newEvent);
+
+                            const eventDetails = newEvent.querySelector('.eventDetails');
+                            eventDetails.addEventListener('click', function() {
+                                const eventID = this.getAttribute('data-event-id');
+                                window.location.href = `/event/${eventID}`;
+                            });
+
+                            if (actionButtonsHTML) {
+                                const registerBtn = newEvent.querySelector('.registerBtn');
+                                const unregisterBtn = newEvent.querySelector('.unregisterBtn');
+
+                                if (registerBtn && unregisterBtn) {
+                                    // Hide the unregister button if the user is not registered
+                                    unregisterBtn.style.display = registered ? 'inline' : 'none';
+                                    // Hide the register button if the user is registered
+                                    registerBtn.style.display = registered ? 'none' : 'inline';
+
+                                    registerBtn.addEventListener('click', async function(event) {
+                                        event.stopPropagation();
+                                        const eventId = this.getAttribute('data-event-id');
+                                        await registerForEvent(eventId, userId);
+                                        // Update button visibility
+                                        registerBtn.style.display = 'none';
+                                        unregisterBtn.style.display = 'inline';
+                                    });
+
+                                    unregisterBtn.addEventListener('click', async function(event) {
+                                        event.stopPropagation();
+                                        const eventId = this.getAttribute('data-event-id');
+                                        await unregisterFromEvent(eventId, userId);
+                                        // Update button visibility
+                                        unregisterBtn.style.display = 'none';
+                                        registerBtn.style.display = 'inline';
+                                    });
+                                }
+                            }
+
+                            const deleteBtns = newEvent.querySelectorAll('.deleteBtn');
+                            deleteBtns.forEach(button => {
+                                button.addEventListener('click', async function(event) {
+                                    event.stopPropagation();
+                                    const eventId = this.getAttribute('data-event-id');
+                                    if (confirm('Are you sure you want to delete this event?')) {
+                                        await deleteEvent(eventId);
+                                    }
+                                });
+                            });
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching events:', error);
             }
-
-            for(const event of events) {
-                const eventElement = document.createElement('div');
-                eventElement.className = 'event';
-                const eventName = event.event_name;
-                const address = event.address;
-                let videoUrl = '';
-                let geocode = '';
-
-                try {
-                    if(event.yt_link) {
-                        console.log('yt link:', event.yt_link);
-                        const url = new URL(event.yt_link);
-                        const videoId = url.searchParams.get('v');
-
-                        if(videoId) {
-                            videoUrl = await fetchVideo(videoId);
-                        }
-
-                        else{
-                            console.error('Youtube URL missing video Id:', event.yt_link);
-                        }
-                    }
-
-                    else {
-                        console.error('Youtube link undefined', event.yt_link);
-                    }
-                } catch (error) {
-                    console.error('Invalid Youtube URL:', event.yt_link, error);
-                    videoUrl = '';
-                }
-
-                geocode = await fetchGeocode(address);
-                const mapId = `map-${event.id}`;
-
-                eventElement.innerHTML = `
-                    <h3>${event.event_name}</h3>
-                    <p>${event.description}</p>
-                    <p><strong>Date:</strong> ${new Date(event.event_date).toLocaleDateString()}</p>
-                    <p><strong>Location:</strong> ${event.address}</p>
-                    <div id="${mapId}" class="map-container"></div>
-                    ${videoUrl ? `
-                        <p><strong>Youtube Video:</strong></p>
-                        <iframe width="720" height="400" src="${videoUrl}" frameborder="0" allowfullscreen></iframe>
-                        ` : ` <p><strong>Youtube Video:</strong></p> `}
-                `;
-                container.appendChild(eventElement);
-
-                if(geocode) {
-                    console.log(mapId, geocode.lat, geocode.lng, address, eventName);
-                    createMap(mapId, geocode.lat, geocode.lng, address, eventName);
-                }
-            };
         }
 
+        
+    async function getUser(id) {
+    try {
+        const response = await fetch(`/api/account/user/${id}`, {
+            method: 'GET',
+        });
+
+        if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        throw error; // Re-throw the error to be handled by the caller if needed
+    }
+}
+
+    async function getUserId(email) {
+        if (email) {
+            try {
+                const response = await fetch(`/api/account/userIdThroughEmail?email=${encodeURIComponent(email)}`, {
+                    method: 'GET',
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                console.log('User ID:', data.userId);
+                return data.userId;
+            } catch (error) {
+                console.error('Error fetching the user ID:', error);
+                return undefined; // Return undefined if there's an error
+            }
+        } else {
+            return undefined;
+        }
+    }
+
+
+    async function registerForEvent(eventId, userId) {
+        try {
+            const response = await fetch('/api/events/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ eventId, userId })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to register for event');
+            }
+
+            const data = await response.json();
+            console.log('Successfully registered:', data);
+        } catch (error) {
+            console.error('Error during registration:', error);
+        }
+    }
+
+    async function unregisterFromEvent(eventId, userId) {
+        try {
+            const response = await fetch('/api/events/unregister', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ eventId, userId })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to unregister from event');
+            }
+
+            const data = await response.json();
+            console.log('Successfully unregistered:', data);
+        } catch (error) {
+            console.error('Error during unregistration:', error);
+        }
+    }
+
+
+
+    async function deleteEvent(eventId) {
+        try {
+            const response = await fetch(`/api/events/${eventId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${getCookie('token')}` // If using JWT in Authorization header
+                }
+            });
+
+            if (response.ok) {
+                alert('Event deleted successfully');
+                // Refresh the list of events
+                fetchEvents('/api/events/getpublic', 'publicEventList', false);
+                fetchEvents('/api/events/getprivate', 'privateEventList', true);
+            } else {
+                const errorData = await response.json();
+                alert(`Failed to delete event: ${errorData.error}`);
+            }
+        } catch (error) {
+            console.error('Error deleting event:', error);
+        }
+    }
         // Fetch and display public events when the page loads
         window.onload = fetchPublicEvents;
     </script>

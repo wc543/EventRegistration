@@ -16,7 +16,94 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/opencagedata/leaflet-opencage-geocoding@v2.0.0/dist/css/L.Control.OpenCageGeocoding.min.css" />
         <script src="https://cdn.jsdelivr.net/gh/opencagedata/leaflet-opencage-geocoding@v2.0.0/dist/js/L.Control.OpenCageGeocoding.min.js"></script>
         <script src="/map.js"></script>
-        
+        <style>
+            .map-container {
+            height: 400px; /* or any other height you prefer */
+            width: 100%;
+            }
+            .map-container {
+                height: 400px;
+                width: 100%;
+            }
+
+            .video-container {
+                position: relative;
+                width: 100%;
+                max-width: 720px;
+                margin: 0 auto;
+                padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            }
+
+            .video-container iframe {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                border: 0;
+            }
+            /* Event Details Styling */
+.event-details {
+    margin: 20px 0;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.event-details h3 {
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+.event-details p {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.event-details strong {
+    font-weight: bold;
+    color: #000;
+}
+
+.map-container {
+    margin-top: 20px;
+}
+
+.video-container {
+    margin-top: 20px;
+}
+
+.comments {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+}
+
+.comment-form input {
+    width: 80%;
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.comment-form button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.comment-form button:hover {
+    background-color: #0056b3;
+}
+
+        </style>
         <title>Events</title>
     </head>
     <body>
@@ -28,20 +115,22 @@
             
             <h2>Event Registration</h2>
             
-            <!-- Placeholder for displaying the event ID -->
-            <p id="eventIdDisplay"></p>
+
+            <div id="eventObject"></div>
+            <div id="inviteFormContainer" style="display:none;">
+                <h3>Invite Users to Private Event</h3>
+                <form id="inviteUserForm">
+                    <label for="inviteUsername">Username:</label>
+                    <input type="text" id="inviteUsername" name="inviteUsername" required>
+                    <input type="hidden" id="eventId" name="eventId">
+                    <button type="submit">Invite</button>
+                </form>
+            </div>
         </div>
         
-        <div id="eventObject"></div>
-        <div id="inviteFormContainer" style="display:none;">
-            <h3>Invite Users to Private Event</h3>
-            <form id="inviteUserForm">
-                <label for="inviteUsername">Username:</label>
-                <input type="text" id="inviteUsername" name="inviteUsername" required>
-                <input type="hidden" id="eventId" name="eventId">
-                <button type="submit">Invite</button>
-            </form>
-        </div>
+
+
+        
 
 
         <script>
@@ -53,7 +142,7 @@
         let eventId = window.location.pathname.split('/').pop();
 
         // Display the event ID on the screen
-        document.getElementById('eventIdDisplay').textContent = `Event ID: ${eventId}`;
+        console.log("Event ID: ", eventId);
 
         try {
             // Fetch event data from the server
@@ -106,28 +195,32 @@
                 const mapId = `map-${event.id}`;
 
                 eventElement.innerHTML = `
-                    <h3>${event.event_name}</h3>
-                    <p>${event.description}</p>
-                    <p><strong>Date:</strong> ${new Date(event.event_date).toLocaleDateString()}</p>
-                    <p><strong>Location:</strong> ${event.address}</p>
-                    <div id="${mapId}" class="map-container"></div>
-                    ${(event.is_private && userId === event.admin_id)? `<button class="inviteBtn" data-event-id="${event.id}">Invite Users</button>` : ''}
-                
+                    <div class="event-details">
+                        <h3>${event.event_name}</h3>
+                        <p>${event.description}</p>
+                        <p><strong>Date:</strong> ${new Date(event.event_date).toLocaleDateString()}</p>
+                        <p><strong>Location:</strong> ${event.address}</p>
+                        <div id="${mapId}" class="map-container"></div>
+                        ${(event.is_private && userId === event.admin_id) ? `<button class="inviteBtn" data-event-id="${event.id}">Invite Users</button>` : ''}
 
-                    ${videoUrl ? `
-                        <p><strong>YouTube Video:</strong></p>
-                        <iframe width="720" height="400" src="${videoUrl}" frameborder="0" allowfullscreen></iframe>
-                        ` : `<p><strong>YouTube Video:</strong></p>`}
+                        ${videoUrl ? `
+                            <h4 class="video-title">Related Video</h4>
+                            <div class="video-container">
+                                <iframe src="${videoUrl}" allowfullscreen></iframe>
+                            </div>
+                        ` : `<p><strong>YouTube Video:</strong> Not available</p>`}
 
-                    <div class="comments">
-                        <h4>Comments</h4>
-                        <form class="comment-form-${event.id}" id="comment-form-${event.id}" data-event-id="${event.id}">
-                            <input type="text" name="comment" placeholder="Add comment" required>
-                            <button type="submit">Post</button>
-                        </form>
-                        <div class="comments-list-${event.id}"></div>
+                        <div class="comments">
+                            <h4>Comments</h4>
+                            <form class="comment-form-${event.id}" id="comment-form-${event.id}" data-event-id="${event.id}">
+                                <input type="text" name="comment" placeholder="Add comment" required>
+                                <button type="submit">Post</button>
+                            </form>
+                            <div class="comments-list-${event.id}"></div>
+                        </div>
                     </div>
                 `;
+
                 fetchComments(eventId);
                 if(geocode) {
                     console.log(mapId, geocode.lat, geocode.lng, event.address, event.event_name);
@@ -150,8 +243,9 @@
                 } else {
                     console.error(`Form with ID comment-form-${event.id} not found`);
                 }
-                if (event.is_private) {
+                if (event.is_private && userId === event.admin_id) {
                     const inviteBtn = eventElement.querySelector('.inviteBtn');
+                    console.log(inviteBtn);
                     inviteBtn.addEventListener('click', function() {
                         const eventId = this.getAttribute('data-event-id');
                         document.getElementById('eventId').value = eventId; // Set the event ID in the invite form

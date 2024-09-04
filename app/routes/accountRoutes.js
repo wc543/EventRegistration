@@ -96,6 +96,26 @@ router.get('/auth/facebook',
     passport.authenticate('facebook', { scope: ['email'] })
 );
 
+router.get('/username', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        // Query the database to fetch the username
+        const userQuery = 'SELECT username FROM users WHERE id = $1';
+        const result = await pool.query(userQuery, [userId]);
+
+        // Check if a user was found
+        if (result.rows.length > 0) {
+            const username = result.rows[0].username;
+            res.json({ username });
+        } else {
+            res.status(404).json({ error: "User not found" });
+        }
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Server error" });
+    }
+});
 
 router.get('/user/:id', async (req, res) => {
     try {

@@ -413,14 +413,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('userEmail').textContent = email ? `Logged in as: ${email}` : 'Not logged in';
 
     // Fetch and display public events
-    fetchEvents('/api/events/getpublic', 'publicEventList', false);
+    fetchEvents('/api/events/getpublic', 'publicEventList');
 
     // Fetch and display private events
-    fetchEvents('/api/events/getprivate', 'privateEventList', true);
+    fetchEvents('/api/events/getprivate', 'privateEventList');
 
     // Function to fetch and display events
 
-    async function fetchEvents(url, listId, isPrivate) {
+    async function fetchEvents(url, listId) {
+
     let userId = await getUserId(email);
 
     try {
@@ -441,7 +442,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             eventList.appendChild(newEvent);
         } else {
             for (const event of data.events) {
-                if (event.is_private === isPrivate) {
                     // Fetch admin user data
                     let adminUsername = 'Loading...';
                     try {
@@ -549,7 +549,6 @@ document.addEventListener('DOMContentLoaded', async function() {
                             }
                         });
                     });
-                }
             }
         }
     } catch (error) {
