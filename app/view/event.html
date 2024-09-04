@@ -16,6 +16,7 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/opencagedata/leaflet-opencage-geocoding@v2.0.0/dist/css/L.Control.OpenCageGeocoding.min.css" />
         <script src="https://cdn.jsdelivr.net/gh/opencagedata/leaflet-opencage-geocoding@v2.0.0/dist/js/L.Control.OpenCageGeocoding.min.js"></script>
         <script src="/map.js"></script>
+        <script src="/payment.js"></script>
         
         <title>Events</title>
     </head>
@@ -30,6 +31,7 @@
             
             <!-- Placeholder for displaying the event ID -->
             <p id="eventIdDisplay"></p>
+            <div id="buttonContainer"></div>
         </div>
         
         <div id="eventObject"></div>
@@ -105,16 +107,16 @@
 
                 geocode = await fetchGeocode(event.address);
                 const mapId = `map-${event.id}`;
+                console.log(event.price);
 
                 eventElement.innerHTML = `
                     <h3>${event.event_name}</h3>
                     <p>${event.description}</p>
                     <p><strong>Date:</strong> ${new Date(event.event_date).toLocaleDateString()}</p>
                     <p><strong>Location:</strong> ${event.address}</p>
-                    <p><strong>YouTube Link:</strong> <a href="${event.yt_link}" target="_blank">${event.yt_link}</a></p>
                     <div id="${mapId}" class="map-container"></div>
                     ${event.is_private ? `<button class="inviteBtn" data-event-id="${event.id}">Invite Users</button>` : ''}
-                
+                    <p><strong>YouTube Link:</strong> <a href="${event.yt_link}" target="_blank">${event.yt_link}</a></p>
 
                     ${videoUrl ? `
                         <p><strong>YouTube Video:</strong></p>
@@ -146,6 +148,20 @@
                         const eventId = this.getAttribute('data-event-id');
                         document.getElementById('eventId').value = eventId; // Set the event ID in the invite form
                         document.getElementById('inviteFormContainer').style.display = 'block'; // Show the invite form
+                    });
+                }
+
+                if(event.price) {
+                    console.log("price:", event.price);
+                    console.log("event name:", event.event_name);
+
+                    const buttonContainer = document.getElementById('buttonContainer');
+                    const purchase = document.createElement("button");
+                    purchase.textContent = "Book Ticket";
+                    buttonContainer.appendChild(purchase);
+
+                    purchase.addEventListener('click', async function() {
+                        await fetchPayment(event.price, event.event_name);
                     });
                 }
 
@@ -202,6 +218,7 @@
                 console.error('Error:', error);
             }
         }
+    }
 
     // Handle tab switching
     const tabs = document.querySelectorAll('.tab');
@@ -214,7 +231,6 @@
             document.getElementById(tab.dataset.tab).classList.add('active');
         });
     });
-    }
 
 
     // Run the async function

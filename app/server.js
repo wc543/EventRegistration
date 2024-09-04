@@ -15,6 +15,7 @@ const notificationRoutes = require('./routes/notificationRoutes');
 const videoRoutes = require('./routes/videoRoutes');
 const geocodeRoutes = require('./routes/geocodeRoutes');
 const emailRoutes = require('./routes/emailRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 app.use(express.static(path.join(__dirname, 'style')));
 app.use(express.static(path.join(__dirname, 'helpers')));
@@ -34,6 +35,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/video', videoRoutes);
 app.use('/api', geocodeRoutes);
 app.use('/api', emailRoutes);
+app.use('/api', paymentRoutes);
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'view', 'home.html'));

@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS "events" (
 	"admin_id" bigint NOT NULL,
 	"event_name" text NOT NULL,
 	"description" text NOT NULL,
+	"price" numeric,
 	"created_at" timestamp without time zone NOT NULL,
 	"address" text NOT NULL,
 	"event_date" timestamp without time zone NOT NULL,

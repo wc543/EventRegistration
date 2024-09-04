@@ -315,9 +315,13 @@
                 <input type="date" id="eventDate" name="eventDate" required><br><br>
                 <label for="eventTime">Event Time:</label>
                 <input type="time" id="eventTime" name="eventTime" required><br><br>
+
+                <label for="eventPrice">Event Price (Optional):</label>
+                <input type="text" id="eventPrice" name="eventPrice"><br><br>
+
                 <label for="eventDescription">Event Description:</label><br>
                 <textarea id="eventDescription" name="eventDescription" rows="4" cols="50" required></textarea><br><br>
-                <label for="ytLink">Youtube Link:</label>
+                <label for="ytLink">Youtube Link (Optional):</label>
                 <input type="text" id="ytLink" name="ytLink"><br><br>
                 <label for="eventPrivate">Private Event:</label>
                 <input type="checkbox" id="eventPrivate" name="eventPrivate"><br><br>
@@ -520,17 +524,22 @@ document.addEventListener('DOMContentLoaded', async function() {
         const eventAddress = document.getElementById('eventAddress').value;
         const eventDate = document.getElementById('eventDate').value;
         const eventTime = document.getElementById('eventTime').value;
+        const eventPrice = document.getElementById('eventPrice').value;
         const eventDescription = document.getElementById('eventDescription').value;
         const ytLink = document.getElementById('ytLink').value;
         const isPrivate = document.getElementById('eventPrivate').checked;
 
         // Combine date and time
         const eventDateTime = new Date(`${eventDate}T${eventTime}`);
+        const offsetHours = 4;
 
+        eventDateTime.setHours(eventDateTime.getHours() - offsetHours);
+        
         const eventDetails = {
             eventName: eventName,
             eventDate: eventDateTime.toISOString(), 
             eventTime: eventTime,
+            eventPrice: eventPrice,
             eventDescription: eventDescription,
             isPrivate: isPrivate, 
             ytLink: ytLink,

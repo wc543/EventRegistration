@@ -7,10 +7,13 @@ const authMiddleware = require('../middleware/authenticateToken');
 router.post('/create', authMiddleware, async (req, res) => {
     console.log("waffles");
     console.log(req.user);
-    const { eventName, eventDate, eventTime, eventDescription, isPrivate, ytLink, address, created_at } = req.body;
-    console.log(eventName, eventDate, eventTime, eventDescription, isPrivate, ytLink, address, created_at);
+    const { eventName, eventDate, eventTime, eventDescription, isPrivate, ytLink, address, created_at, eventPrice } = req.body;
+    console.log(eventName, eventDate, eventTime, eventDescription, isPrivate, ytLink, address, created_at, eventPrice);
     adminId = req.user.userId;
     console.log(adminId);
+
+    const price = eventPrice ? eventPrice : null;
+    console.log(price);
     
     try {
       // Check if the adminId exists in the users table
@@ -20,9 +23,9 @@ router.post('/create', authMiddleware, async (req, res) => {
       }
   
       const result = await pool.query(
-        `INSERT INTO events("is_private", "yt_link", "admin_id", "event_name", "description", created_at, address, event_date)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`,
-        [isPrivate, ytLink, adminId, eventName, eventDescription, created_at, address, eventDate]
+        `INSERT INTO events("is_private", "yt_link", "admin_id", "event_name", "description", created_at, address, event_date, price)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);`,
+        [isPrivate, ytLink, adminId, eventName, eventDescription, created_at, address, eventDate, price]
       );
       res.status(201).json(result.rows[0]);
     } catch (err) {
