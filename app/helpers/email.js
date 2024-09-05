@@ -2,6 +2,7 @@ const pool = require('../db');
 const nodemailer = require("nodemailer");
 const mailjetTransporter = require('nodemailer-mailjet-transport');
 const env = require("../../env.json");
+const QRCode = require('qrcode');
 const mailjetKey = env.mailjet_key;
 const mailjetSecret = env.mailjet_secret_key;
 
@@ -11,6 +12,16 @@ const transporter = nodemailer.createTransport(mailjetTransporter({
         apiSecret: mailjetSecret
     }
 }));
+
+const generateQRCode = async (url) => {
+    try {
+        const dataUrl = await QRCode.toDataURL(url);
+        return dataUrl;
+    } catch (error) {
+        console.error('Error creating qr code', error);
+        throw error;
+    }
+}
 
 const sendEventReminder = async (user_email) => {
     const daysBeforeEvent = 7;
@@ -95,4 +106,48 @@ const sendEventReminder = async (user_email) => {
     }
 };
 
-module.exports = sendEventReminder;
+const sendPaymentConfirmation = async (user_email, amount, eventName) => {
+    try {
+        const qrCodeUrl = await generateQRCode('https://www.youtube.com/watch?v=p7YXXieghto');
+        console.log(qrCodeUrl);
+
+        const mail = {
+            from: '"Event Registration" <do-not-reply.events_uvuch@outlook.com>',
+            to: user_email,
+            subject: `Event Payment Confirmation`,
+            attachDataUrls: true,
+            //text: "",
+            html: `
+                <html>
+                <body>
+                    <p>Hi there,</p>
+                    <p>Thank you for your payment for the event: <strong>${eventName}</strong></p>
+                    <p>Your total payment amount is: <strong>${amount} USD</strong>.</p>
+                    <p>We are looking forward to seeing you at the event!</p>
+                    <p>Please find the QR code below:</p>
+                    <img src="${qrCodeUrl}" alt="QR Code" />
+                    <p>Best regards,</p>
+                    <p>The Event Team</p>
+                </body>
+                </html>
+            `,
+        };
+
+        console.log(`Sending email to: ${user_email}`);
+
+        try {
+            await transporter.sendMail(mail);
+        } catch (error) {
+            console.error('Error sending email:', error.message);
+        }
+        console.log(`Successfully sent to: ${user_email}`)
+    } catch (error) {
+        console.error('sendPaymentConfirmation Error:', error.message);
+        throw error;
+    }
+}
+
+module.exports = {
+    sendEventReminder,
+    sendPaymentConfirmation
+};

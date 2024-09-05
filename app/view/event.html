@@ -16,6 +16,8 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/opencagedata/leaflet-opencage-geocoding@v2.0.0/dist/css/L.Control.OpenCageGeocoding.min.css" />
         <script src="https://cdn.jsdelivr.net/gh/opencagedata/leaflet-opencage-geocoding@v2.0.0/dist/js/L.Control.OpenCageGeocoding.min.js"></script>
         <script src="/map.js"></script>
+        <script src="/payment.js"></script>
+        
         <style>
 /* Map Container */
 .map-container {
@@ -177,6 +179,7 @@
 
 
         </style>
+
         <title>Events</title>
     </head>
     <body>
@@ -199,6 +202,11 @@
 
             <h2>Event Registration</h2>
             
+
+            <!-- Placeholder for displaying the event ID -->
+            <p><strong id="eventIdDisplay"></strong></p>
+            <p><strong id="eventPriceDisplay"></strong></p>
+            <div id="buttonContainer"></div>
 
             <div id="eventObject"></div>
             <div id="inviteFormContainer" style="display:none;">
@@ -423,8 +431,38 @@
                     console.error('Failed to fetch event');
                     alert('Failed to load event');
                 }
+
+                if (event.is_private) {
+                    const inviteBtn = eventElement.querySelector('.inviteBtn');
+                    inviteBtn.addEventListener('click', function() {
+                        const eventId = this.getAttribute('data-event-id');
+                        document.getElementById('eventId').value = eventId; // Set the event ID in the invite form
+                        document.getElementById('inviteFormContainer').style.display = 'block'; // Show the invite form
+                    });
+                }
+
+                if(event.price) {
+                    console.log("price:", event.price);
+                    console.log("event name:", event.event_name);
+
+                    document.getElementById('eventPriceDisplay').textContent = `Price: $${event.price}`;
+                    const buttonContainer = document.getElementById('buttonContainer');
+                    const purchase = document.createElement("button");
+                    purchase.textContent = "Book Ticket";
+                    buttonContainer.appendChild(purchase);
+
+                    purchase.addEventListener('click', async function() {
+                        await fetchPayment(event.price, event.event_name);
+                    });
+                }
+
+            } else {
+                console.error('Failed to fetch event');
+                alert('Failed to load event');
+
             } catch (error) {
                 console.error('Error fetching event:', error);
+
             }
             inviteUserSubmission();
 
@@ -501,6 +539,7 @@
                 console.error('Error:', error);
             }
         }
+    }
 
         
 
@@ -515,7 +554,6 @@
             document.getElementById(tab.dataset.tab).classList.add('active');
         });
     });
-    }
 
     function showNotification(message) {
             const notificationContainer = document.getElementById('notification-container');

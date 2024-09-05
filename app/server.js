@@ -20,6 +20,7 @@ const notificationRoutes = require('./routes/notificationRoutes');
 const videoRoutes = require('./routes/videoRoutes');
 const geocodeRoutes = require('./routes/geocodeRoutes');
 const emailRoutes = require('./routes/emailRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 
@@ -43,6 +44,7 @@ app.use('/api/comments', commentRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api', geocodeRoutes);
 app.use('/api', emailRoutes);
+app.use('/api', paymentRoutes);
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'view', 'home.html'));

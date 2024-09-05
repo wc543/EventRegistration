@@ -286,6 +286,12 @@ body {
     margin: 0;
 }
 
+
+.map-container {
+    height: 500px;
+    width: 500px;
+}
+
 /*Different Notification */
 #notification {
     position: fixed;
@@ -518,4 +524,3 @@ body {
 #messagebtn:hover, #events-button:hover {
     background-color: #218838;
 }
-
