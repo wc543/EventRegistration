@@ -351,6 +351,7 @@
 
                     geocode = await fetchGeocode(event.address);
                     const mapId = `map-${event.id}`;
+                    console.log(event.price);
 
                     eventElement.innerHTML = `
                 <div class="event-details">
@@ -427,21 +428,7 @@
                         });
                     }
 
-                } else {
-                    console.error('Failed to fetch event');
-                    alert('Failed to load event');
-                }
-
-                if (event.is_private) {
-                    const inviteBtn = eventElement.querySelector('.inviteBtn');
-                    inviteBtn.addEventListener('click', function() {
-                        const eventId = this.getAttribute('data-event-id');
-                        document.getElementById('eventId').value = eventId; // Set the event ID in the invite form
-                        document.getElementById('inviteFormContainer').style.display = 'block'; // Show the invite form
-                    });
-                }
-
-                if(event.price) {
+                    if(event.price) {
                     console.log("price:", event.price);
                     console.log("event name:", event.event_name);
 
@@ -454,6 +441,11 @@
                     purchase.addEventListener('click', async function() {
                         await fetchPayment(event.price, event.event_name);
                     });
+                }
+
+                } else {
+                    console.error('Failed to fetch event');
+                    alert('Failed to load event');
                 }
 
             } catch (error) {
