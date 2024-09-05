@@ -1,49 +1,226 @@
-ul {
-    list-style-type: none;
+/* Global Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f2f5;
     margin: 0;
+    padding-top: 60px; /* Add padding equal to the navbar height */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #333;
+}
+
+/* Navigation */
+.nav {
+    list-style-type: none;
     padding: 0;
-    overflow: hidden;
-    background-color: #3a3a3a;
-}
-  
-li {
-    float: left;
-}
-  
-li a {
-    display: block;
-    color: white;
+    margin: 0;
     text-align: center;
-    padding: 10px;
-    text-decoration: none;
 }
 
-.event {
-    border: 1px solid #ccc;
-    padding: 15px;
-    margin-bottom: 10px;
+.nav li {
+    display: inline-block;
+    margin: 0 10px;
+}
+
+.nav li a {
+    display: block;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
     border-radius: 5px;
-    background-color: #f9f9f9;
-}
-
-.event h3 {
-    margin-top: 0;
-}
-
-.event p {
-    margin: 5px 0;
-}
-
-.event a {
-    color: #007bff;
     text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
 }
 
-.event a:hover {
-    text-decoration: underline;
+.nav li a:hover {
+    background-color: #45a049;
 }
 
-/* Basic styling for the notifications sidebar */
+/* Container */
+.container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 700px;
+    width: 100%;
+    margin-top: 20px;
+    box-sizing: border-box;
+    text-align: center; /* Center text and inline elements */
+}
+
+/* Tabs and Tab Contents */
+.tab-container {
+    display: flex;
+    justify-content: center; /* Center tabs horizontally */
+    margin-bottom: 20px;
+}
+
+.tab {
+    cursor: pointer;
+    padding: 10px 20px;
+    border: 1px solid #ccc;
+    background-color: #f4f4f4;
+    margin: 0 5px;
+    border-radius: 5px 5px 0 0;
+}
+
+.tab.active {
+    background-color: #4CAF50;
+    color: white;
+    border-bottom: none;
+}
+
+.tab-content {
+    display: none;
+    padding: 20px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 0 5px 5px 5px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Search Bar */
+#searchBar {
+    width: calc(100% - 20px); /* Adjust width to account for container padding */
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box; /* Ensure padding is included in width calculation */
+}
+
+.container h2, .container h3 {
+    text-align: center;
+    color: #4CAF50;
+    margin-bottom: 20px;
+}
+
+
+/* Form Styles */
+#eventForm {
+    display: none;
+    margin-bottom: 20px;
+}
+
+#eventForm input, #eventForm textarea {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+#eventForm input[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#eventForm input[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+/* Event List Styles */
+#eventList, #publicEventList, #privateEventList, #yourEventList, #registeredEventList {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+#eventList li, #publicEventList li, #privateEventList li, #yourEventList li, #registeredEventList li{
+    padding: 20px;
+    margin-bottom: 15px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-left: 5px solid #4CAF50;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+#eventList li {
+    padding: 20px;
+    margin-bottom: 15px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-left: 5px solid #4CAF50;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+    text-align: left; /* Override to left-align text within event list items */
+}
+
+#eventList li:hover, #publicEventList li:hover, #privateEventList li:hover, #yourEventList li:hover, #registeredEventList li:hover{
+    transform: translateY(-5px);
+}
+
+
+
+#userEmail {
+    position: fixed; /* Use fixed to keep it visible relative to the viewport */
+    top: 20px; /* Adjust as needed */
+    left: 20px; /* Adjust as needed */
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    z-index: 1001; /* Ensure it's above other content */
+    background-color: #fff; /* Optional: background to ensure readability */
+    padding: 5px 10px; /* Optional: padding for better visibility */
+    border-radius: 5px; /* Optional: rounded corners for aesthetic */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Optional: shadow for better visibility */
+}
+
+/* Event Details */
+.eventDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 15px;
+    border: 1px solid #ddd; /* Add a border around the event details */
+    border-radius: 8px;
+}
+
+.eventDetails span {
+    margin-bottom: 3px;
+}
+
+.eventName {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #333;
+}
+
+.eventDate {
+    font-style: italic;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.eventDescription {
+    margin-top: 10px;
+    font-size: 1em;
+    color: #555;
+    line-height: 1.5em;
+}
+
+.eventLink {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Notifications Sidebar */
 #notifications-sidebar {
     position: fixed;
     right: -400px; /* Completely hidden off-screen */
@@ -61,25 +238,21 @@ li a {
     align-items: center; /* Center items horizontally */
 }
 
-/* Ensure the body doesn't allow horizontal scrolling */
-body {
-    overflow-x: hidden;
+#notifications-sidebar.active {
+    right: 0; /* Slide into view */
 }
+
 
 #notifications-button {
     position: fixed;
     right: 10px;
-    top: 20px;
+    top: 12px;
     z-index: 1100;
     padding: 10px 20px;
-    background-color: #007BFF;
+    background-color: #4CAF50;
     color: white;
     border: none;
     cursor: pointer;
-}
-
-#notifications-sidebar.active {
-    right: 0; /* Slide into view */
 }
 
 #notifications-list {
@@ -104,7 +277,6 @@ body {
     align-items: center; /* Center content within each notification box */
 }
 
-
 .notification-item h4 {
     margin: 0 0 10px;
     font-size: 1.2em;
@@ -114,41 +286,241 @@ body {
     margin: 0;
 }
 
+
 .map-container {
     height: 500px;
     width: 500px;
 }
 
-.event-container {
+/*Different Notification */
+#notification {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px; /* Adjust width as needed */
+    z-index: 1000; /* Ensure it's above other content */
+    pointer-events: none; /* Prevent interaction */
+}
+
+.notification {
+    background-color: #4CAF50; /* Green background for success, change as needed */
+    color: white;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(-100px); /* Start off-screen */
+    animation: slideIn 0.5s forwards, fadeOut 0.5s 2.5s forwards;
+}
+
+/* Navbar */
+.navbar {
+    background-color: #333;
+    width: 100%; /* Make the navbar span the full width of the screen */
+    padding: 10px 0; /* Adjust padding if needed */
+    position: fixed; /* Fix the navbar to the top of the page */
+    top: 0;
+    left: 0;
+    z-index: 1000; /* Ensure it stays above other elements */
+}
+
+/* Adjust the navigation list */
+.nav-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
+}
+
+/* Adjust the individual items */
+.nav-item {
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+}
+
+.nav-item:hover {
+    background-color: #555;
+}
+
+
+/* Titles */
+.page-title {
+    text-align: center;
+    margin: 20px 0;
+    color: #333;
+}
+
+.section-title {
+    font-size: 1.5em;
+    margin: 10px 0;
+    text-align: center;
+}
+
+/* Sidebar */
+.sidebar {
+    display: none;
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 300px;
+    height: 100%;
+    background-color: white;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+    overflow-y: auto;
     padding: 20px;
 }
 
-.event-details {
-    flex: 3;
-    margin-right: 20px;
+.sidebar.active {
+    display: block;
 }
 
-.comments-section {
-    flex: 1;
-    border: 1px solid #ddd;
-    padding: 10px;
-    max-width: 300px;
+/* Buttons */
+.btn {
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
 }
 
-.comment-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.btn:hover {
+    background-color: #555;
 }
 
-.comment-form input {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+#createEventBtn {
+    width: 100%;
+    padding: 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    transition: background-color 0.3s ease;
 }
 
-.comments-list {
+#createEventBtn:hover {
+    background-color: #45a049;
+}
+
+/* Events Container */
+.events-container {
+    margin: 20px;
+}
+
+.deleteBtn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 5px 10px;
+    margin-top: 10px;
+}
+
+.deleteBtn:hover {
+    background-color: #c0392b;
+}
+
+.no-events-message {
+    display: block;
+    text-align: center;
     margin-top: 20px;
+    padding: 10px; /* Add some padding inside the element */
+    font-size: 16px; /* Adjust font size if needed */
+    color: #555; /* Optional: Change color to fit your theme */
+    border: 1px solid #4CAF50; /* Light gray border */
+    border-radius: 8px; /* Rounded corners */
+    background-color: #f9f9f9; /* Light background color */
+    width: fit-content; /* Adjust width to fit the content */
+    margin-left: auto;
+    margin-right: auto; /* Center the element horizontally */
+}
+
+.registerBtn {
+    background-color: green; /* Green background */
+    color: white;            /* White text */
+    border: none;            /* No border */
+    padding: 10px 20px;      /* Padding for better appearance */
+    margin: 5px;             /* Margin for spacing */
+    border-radius: 5px;      /* Rounded corners */
+    cursor: pointer;         /* Pointer cursor on hover */
+    font-size: 16px;         /* Font size */
+}
+
+.registerBtn:hover {
+    background-color: darkgreen; /* Darker green on hover */
+}
+
+/* Styles for the unregister button */
+.unregisterBtn {
+    background-color: white; /* Light gray background */
+    color: black;                /* Black text */
+    border: 2px solid green;     /* Green border */
+    padding: 10px 20px;          /* Padding for better appearance */
+    margin: 5px;                 /* Margin for spacing */
+    border-radius: 5px;          /* Rounded corners */
+    cursor: pointer;             /* Pointer cursor on hover */
+    font-size: 16px;             /* Font size */
+}
+
+.unregisterBtn:hover {
+    background-color: gray;      /* Gray background on hover */
+}
+
+
+.button-container {
+    position: fixed;
+    top: 0;
+    left: 0; /* Ensure it starts from the leftmost edge */
+    width: 100vw; /* Full viewport width */
+    background-color: #f8f8f8;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.button-container button {
+    margin: 0 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.button-container button:hover {
+    background-color: #45a049;
+}
+
+
+/* Hide element without affecting layout */
+.hidden {
+    display: none;
+}
+
+
+
+/* Specific styles for different button types */
+#logout-button {
+    background-color: #28a745;
+}
+
+#logout-button:hover {
+    background-color: #218838;
+}
+
+#messagebtn, #events-button {
+    background-color: #28a745;
+}
+
+#messagebtn:hover, #events-button:hover {
+    background-color: #218838;
 }

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Page</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -51,9 +52,40 @@
             text-decoration: none;
             color: #4CAF50;
         }
+        .button-container {
+            position: fixed;
+            top: 0;
+            left: 0; /* Ensure it starts from the leftmost edge */
+            width: 100vw; /* Full viewport width */
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            justify-content: center; /* Center buttons horizontally */
+            align-items: center; /* Optional: Center buttons vertically */
+            gap: 10px; /* Optional: Space between buttons */
+        }
+
+        .button-container button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .button-container button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
+    <div class="button-container">
+        <button id="homebtn">Home</button>
+        <button id="events-button">Events</button>
+    </div>
     <div class="container">
         <h2>Login</h2>
         <form id="loginForm">
@@ -66,6 +98,16 @@
     </div>
 
     <script>
+        const eventButton = document.getElementById('events-button');
+        const homeButton = document.getElementById('homebtn');
+
+        eventButton.addEventListener('click', () => {
+            window.location.href = '/events'; // or your login/signup page
+        });
+        homeButton.addEventListener('click', () => {
+            window.location.href = '/'; // or your login/signup page
+        });
+
         document.getElementById('loginForm').addEventListener('submit', async function(event) {
             event.preventDefault(); // Prevent the default form submission
     

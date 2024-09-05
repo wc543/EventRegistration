@@ -37,13 +37,18 @@ CREATE TABLE IF NOT EXISTS "tags" (
 );
 
 CREATE TABLE IF NOT EXISTS "private_event_members" (
-	"user_id" bigint NOT NULL UNIQUE,
-	"event_id" bigint NOT NULL UNIQUE
+	"user_id" bigint NOT NULL,
+	"event_id" bigint NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "event_registrants" (
-	"event_id" bigint NOT NULL UNIQUE,
-	"user_id" bigint NOT NULL UNIQUE
+	"event_id" bigint NOT NULL,
+	"user_id" bigint NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "active_conversations" (
+	"sender_id" bigint NOT NULL,
+	"recipient_id" bigint NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "comments" (
@@ -86,6 +91,7 @@ CREATE TABLE IF NOT EXISTS "blocked_users" (
 
 CREATE TABLE IF NOT EXISTS "notifications" (
 	"id" bigint GENERATED ALWAYS AS IDENTITY NOT NULL UNIQUE,
+	"type" VARCHAR NOT NULL,
 	"user_id" bigint NOT NULL,
 	"event_id" bigint,
 	"body" text NOT NULL,
@@ -119,7 +125,7 @@ ALTER TABLE "notifications" ADD CONSTRAINT "notifications_fk1" FOREIGN KEY ("use
 
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_fk2" FOREIGN KEY ("event_id") REFERENCES "events"("id");
 
-ALTER TABLE "private_event_members" DROP CONSTRAINT IF EXISTS "private_event_members_event_id_key";
-ALTER TABLE "private_event_members" ADD CONSTRAINT "private_event_members_user_event_unique" UNIQUE ("user_id", "event_id");
+ALTER TABLE "event_registrants" DROP CONSTRAINT "event_registrants_fk0";
+ALTER TABLE "event_registrants" ADD CONSTRAINT "event_registrants_fk0" FOREIGN KEY ("event_id") REFERENCES "events"("id") ON DELETE CASCADE;
 
 ALTER TABLE "users" ADD COLUMN "facebook_id" VARCHAR(255), ADD COLUMN "first_name" VARCHAR(255), ADD COLUMN "last_name" VARCHAR(255);

@@ -18,22 +18,25 @@ passport.use(new FacebookStrategy({
 },
     async (accessToken, refreshToken, profile, done) => {
         try {
-            const { id, username, emails, name } = profile;
+            let { id, username, emails, name } = profile;
             console.log("profile:\n", profile);
             const email = emails && emails.length > 0 ? emails[0].value : null;
             const firstName = name?.givenName || '';
             const lastName = name?.familyName || '';
 
             // Generate a username if not set (this could be more sophisticated)
-
+            console.log("is username var set?:", !username);
             if (!username) {
+                console.log("Creating new username...");
                 if (!firstName || !lastName) {
-                  let username = `user_${id}`;
+                  username = `user_${id}`;
+                  console.log("Generated username:", username);
                 } else {
-                  let username = `${firstName}.${lastName}`.toLowerCase();
+                  username = `${firstName}.${lastName}`.toLowerCase();
+                  console.log("Generated username:", username);
                 }
             }
-
+            console.log("value of username:", username);
             // Check if the user already exists in the database
             let user = await db.query('SELECT * FROM users WHERE facebook_id = $1 OR email = $2', [id, email]);
 
