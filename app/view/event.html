@@ -30,7 +30,8 @@
             <h2>Event Registration</h2>
             
             <!-- Placeholder for displaying the event ID -->
-            <p id="eventIdDisplay"></p>
+            <p><strong id="eventIdDisplay"></strong></p>
+            <p><strong id="eventPriceDisplay"></strong></p>
             <div id="buttonContainer"></div>
         </div>
         
@@ -155,6 +156,7 @@
                     console.log("price:", event.price);
                     console.log("event name:", event.event_name);
 
+                    document.getElementById('eventPriceDisplay').textContent = `Price: $${event.price}`;
                     const buttonContainer = document.getElementById('buttonContainer');
                     const purchase = document.createElement("button");
                     purchase.textContent = "Book Ticket";

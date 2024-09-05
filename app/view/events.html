@@ -448,11 +448,14 @@ document.addEventListener('DOMContentLoaded', async function() {
                         deleteButtonHTML = `<button class="deleteBtn" data-event-id="${event.id}">Delete</button>`;
                     }
 
+                    const price = event.price != null ? `$${event.price}` : 'FREE';
+
                     newEvent.innerHTML = `
                         <div class="eventDetails" data-event-id="${event.id}">
                             <span class="eventName">${event.event_name}</span>
                             <span class="eventDate">${new Date(event.event_date).toLocaleDateString()} at ${new Date(event.event_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             <div class="eventDescription">${event.description}</div>
+                            <span class="eventPrice"><strong>Price:</strong> ${price}</span>
                             ${deleteButtonHTML}
                         </div>
                     `;
