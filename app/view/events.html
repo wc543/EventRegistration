@@ -4,302 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Events</title>
-    <style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f0f2f5;
-        margin: 0;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        color: #333;
-    }
-
-    .container {
-        background-color: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        max-width: 700px;
-        width: 100%;
-        margin-top: 20px;
-        box-sizing: border-box; /* Ensure padding is included in width calculation */
-    }
-
-    #searchBar {
-        width: calc(100% - 20px); /* Adjust width to account for container padding */
-        padding: 10px;
-        margin-bottom: 20px;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-        box-sizing: border-box; /* Ensure padding is included in width calculation */
-    }
-
-    .container h2, .container h3 {
-        text-align: center;
-        color: #4CAF50;
-        margin-bottom: 20px;
-    }
-
-    .nav {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-        text-align: center;
-        margin-bottom: 20px;
-    }
-
-    .nav li {
-        display: inline;
-        margin: 0 10px;
-    }
-
-    .nav li a {
-        display: inline-block;
-        padding: 10px 20px;
-        background-color: #4CAF50;
-        color: white;
-        border-radius: 5px;
-        text-decoration: none;
-        font-weight: bold;
-        text-align: center;
-        transition: background-color 0.3s ease;
-    }
-
-    .nav li a:hover {
-        background-color: #45a049;
-    }
-
-    #createEventBtn {
-        width: 100%;
-        padding: 15px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: bold;
-        margin-bottom: 20px;
-        transition: background-color 0.3s ease;
-    }
-
-    #createEventBtn:hover {
-        background-color: #45a049;
-    }
-
-    #eventForm {
-        display: none;
-        margin-bottom: 20px;
-    }
-
-    #eventForm input, #eventForm textarea {
-        width: calc(100% - 20px);
-        padding: 10px;
-        margin: 10px 0;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-size: 14px;
-    }
-
-    #eventForm input[type="submit"] {
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        width: 100%;
-        font-size: 16px;
-        font-weight: bold;
-    }
-
-    #eventForm input[type="submit"]:hover {
-        background-color: #45a049;
-    }
-
-    #eventList, #publicEventList, #privateEventList {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    #eventList li, #publicEventList li, #privateEventList li {
-        padding: 20px;
-        margin-bottom: 15px;
-        background-color: #ffffff;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        border-left: 5px solid #4CAF50;
-        transition: transform 0.3s ease;
-        cursor: pointer; /* Add this line to change the cursor to a pointer */
-    }
-
-    #eventList li {
-        padding: 20px;
-        margin-bottom: 15px;
-        background-color: #ffffff;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        border-left: 5px solid #4CAF50;
-        transition: transform 0.3s ease;
-    }
-
-
-    #eventList li:hover, #publicEventList li:hover, #privateEventList li:hover {
-        transform: translateY(-5px);
-    }
-
-    .eventDetails {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        padding: 15px;
-        border: 1px solid #ddd; /* Add a border around the event details */
-        border-radius: 8px;
-    }
-
-    .eventDetails span {
-        margin-bottom: 3px;
-    }
-
-    .eventName {
-        font-weight: bold;
-        font-size: 1.2em;
-        color: #333;
-    }
-
-    .eventDate {
-        font-style: italic;
-        font-size: 0.9em;
-        color: #666;
-    }
-
-    .eventDescription {
-        margin-top: 10px;
-        font-size: 1em;
-        color: #555;
-        line-height: 1.5em;
-    }
-
-    .eventLink {
-        text-decoration: none;
-        color: inherit;
-    }
-
-    #emptyListMessage {
-        text-align: center; /* Center the text horizontally */
-        font-family: Arial, sans-serif; /* Use a nice, clean font */
-        font-size: 1.2em; /* Slightly larger font size */
-        color: #666; /* Soft grey color for the text */
-        margin: 20px; /* Add some margin around the message */
-        padding: 20px; /* Add padding inside the div */
-        border: 1px solid #ddd; /* Light border around the message */
-        border-radius: 5px; /* Rounded corners for a smoother look */
-        background-color: #f9f9f9; /* Light background color for contrast */
-    }
-
-    #userEmail {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        font-size: 16px;
-        font-weight: bold;
-        color: #333;
-    }
-
-    /* Notification styles */
-    .notification {
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: #4CAF50;
-        color: white;
-        padding: 15px;
-        border-radius: 5px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        display: none;
-        z-index: 1000;
-        font-size: 16px;
-    }
-
-
-    .tab-container {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 20px;
-    }
-
-    .tab {
-        cursor: pointer;
-        padding: 10px 20px;
-        border: 1px solid #ccc;
-        background-color: #f4f4f4;
-        margin: 0 5px;
-        border-radius: 5px 5px 0 0;
-    }
-
-    .tab.active {
-        background-color: #4CAF50;
-        color: white;
-        border-bottom: none;
-    }
-
-    .tab-content {
-        display: none;
-        padding: 20px;
-        background-color: white;
-        border: 1px solid #ccc;
-        border-radius: 0 5px 5px 5px;
-    }
-
-    .tab-content.active {
-        display: block;
-    }
-
-    .deleteBtn {
-        background-color: #e74c3c;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        padding: 5px 10px;
-        margin-top: 10px;
-    }
-
-    .deleteBtn:hover {
-        background-color: #c0392b;
-    }
-
-    .no-events-message {
-        display: block;
-        text-align: center;
-        margin-top: 20px;
-        padding: 10px; /* Add some padding inside the element */
-        font-size: 16px; /* Adjust font size if needed */
-        color: #555; /* Optional: Change color to fit your theme */
-        border: 1px solid #4CAF50; /* Light gray border */
-        border-radius: 8px; /* Rounded corners */
-        background-color: #f9f9f9; /* Light background color */
-        width: fit-content; /* Adjust width to fit the content */
-        margin-left: auto;
-        margin-right: auto; /* Center the element horizontally */
-    }
-
-
-
-    </style>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
     <div id="userEmail"></div>
-    <div class="container">
-        <ul class="nav">
-            <li><a href="/">Home</a></li>
-            <li><a href="/login">Login</a></li>
+    <button id="notifications-button" class ="hidden">Notifications</button>
+    
+    <!-- Notifications Sidebar -->
+    <div id="notifications-sidebar">
+        <h3>Notifications</h3>
+        <ul id="notifications-list">
+            <!-- Notifications will be dynamically added here -->
         </ul>
+    </div>
+    <div class="container">
+        <div class="button-container">
+            <button id="homebtn">Home</button>
+            <button id="messagebtn" class="hidden">Messages</button>
+            <button id="login-signup-button">Login/Signup</button>
+            <button id="logout-button" class="hidden">Logout</button>
+        </div>
         
-        <h2>Event Registration</h2>
+        <h2>Events</h2>
         <input type="text" id="searchBar" placeholder="Search events by name..." style="width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ccc;">
 
         <button id="createEventBtn">Create Event</button>
@@ -353,9 +79,208 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
     }
 
+    const homeButton = document.getElementById('homebtn');
+    const loginSignupButton = document.getElementById('login-signup-button');
+    const logoutButton = document.getElementById('logout-button');
+    const messageButton = document.getElementById('messagebtn');
+    const notificationButton = document.getElementById('notifications-button');
+
+
     const searchBar = document.getElementById('searchBar');
     const publicEventList = document.getElementById('publicEventList');
     const privateEventList = document.getElementById('privateEventList');
+    const email = getCookie('user_email'); 
+    document.getElementById('userEmail').textContent = email ? `Logged in as: ${email}` : 'Not logged in';
+    document.getElementById('notifications-button').addEventListener('click', function() {
+        const sidebar = document.getElementById('notifications-sidebar');
+        sidebar.classList.toggle('active');
+        console.log('Sidebar toggled:', sidebar.classList.contains('active'));
+    });
+    if (email) {
+        notificationButton.classList.remove('hidden');
+        loginSignupButton.classList.add('hidden');
+        logoutButton.classList.remove('hidden');
+        messageButton.classList.remove('hidden'); // Show the message button if logged in
+        await getNotifications();
+    } else {
+        notificationButton.classList.add('hidden');
+        loginSignupButton.classList.remove('hidden');
+        logoutButton.classList.add('hidden');
+        messageButton.classList.add('hidden'); // Hide the message button if not logged in
+    }
+
+    homeButton.addEventListener('click', () => {
+        window.location.href = '/'; // or your login/signup page
+    });
+    messageButton.addEventListener('click', () => {
+        window.location.href = '/messages'; // or your messages page
+    });
+    loginSignupButton.addEventListener('click', () => {
+        window.location.href = '/login'; // or your login/signup page
+    });
+    logoutButton.addEventListener('click', async () => {
+        try {
+                const response = await fetch('/api/account/logout', { method: 'POST' });
+                if (response.ok) {
+                    // Redirect to the login page or refresh the page
+                    window.location.href = '/events'; // Or window.location.reload();
+                } else {
+                    console.error('Failed to log out');
+                }
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+    });
+
+    function showNotification(message) {
+            const notificationContainer = document.getElementById('notification-container');
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            notificationContainer.appendChild(notification);
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                notification.classList.add('hide');
+                setTimeout(() => {
+                    notificationContainer.removeChild(notification);
+                }, 500);
+            }, 5000);
+        }
+
+
+        async function getNotifications() {
+            try {
+                console.log("in th method");
+                let response = await fetch('/api/notifications/getall', {
+                    method: 'GET',
+                    credentials: 'include' 
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                console.log("getting data ready");
+                const data = await response.json();
+                console.log("data ready");
+                displayNotifications(data); 
+                // Pass the fetched notifications to display function
+                console.log("joever");
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+            }
+        }
+
+
+        function displayNotifications(notifications) {
+            const notificationsList = document.getElementById('notifications-list');
+            notificationsList.innerHTML = ''; // Clear existing notifications
+
+            if (notifications.length === 0) {
+                notificationsList.innerHTML = '<li>No new notifications.</li>';
+                return;
+            }
+            notifications.forEach(async (notification) => {
+                try {
+                    if (notification.type === "event"){
+                    // Fetch event details
+                    const response = await fetch(`/api/events/${notification.event_id}`, {
+                        method: 'GET',
+                        credentials: 'include' // Include cookies in the request
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    const event = await response.json();
+
+                    // Create a container for the notification content
+                    const notificationElement = document.createElement('li');
+                    notificationElement.className = 'notification-item';
+
+                    const notificationContent = document.createElement('div');
+                    notificationContent.innerHTML = `
+                        <h4>Event Name: ${event.event_name}</h4>
+                        <p>${notification.body}</p>
+                    `;
+
+                    notificationElement.appendChild(notificationContent);
+
+                    notificationElement.addEventListener('click', () => {
+
+                            window.location.href = `/event/${notification.event_id}`;
+                    });
+                    notificationsList.appendChild(notificationElement);
+                }
+                else if (notification.type === "new contact"){
+                    const notificationElement = document.createElement('li');
+                    notificationElement.className = 'notification-item';
+
+                    const notificationContent = document.createElement('div');
+                    notificationContent.innerHTML = `
+                        <h4>${notification.body}</h4>
+                    `;
+
+                    notificationElement.appendChild(notificationContent);
+
+                    notificationElement.addEventListener('click', () => {
+                        window.location.href = `/messages`;            
+                    });
+                    notificationsList.appendChild(notificationElement);
+                }
+                else if (notification.type === "registration"){
+                    // Fetch event details
+                    const response = await fetch(`/api/events/${notification.event_id}`, {
+                        method: 'GET',
+                        credentials: 'include' // Include cookies in the request
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    const event = await response.json();
+
+
+                    const amountRes = await fetch(`/api/events/registeredAmount/${notification.event_id}`, {
+                        method: 'GET',
+                        credentials: 'include' // Include cookies in the request
+                    });
+
+                    if (!amountRes.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    
+                    const amount = await amountRes.json();
+                    console.log("AMOUNT: ", amount);
+
+                    // Create a container for the notification content
+                    const notificationElement = document.createElement('li');
+                    notificationElement.className = 'notification-item';
+                    let s = "";
+                    if (amount.registrationCount > 1) s = "s";
+                    const notificationContent = document.createElement('div');
+                    notificationContent.innerHTML = `
+                        <h4>${notification.body}</h4>
+                        <p>It has ${amount.registrationCount} registration${s}!</p>
+                    `;
+
+                    notificationElement.appendChild(notificationContent);
+
+                    notificationElement.addEventListener('click', () => {
+
+                            window.location.href = `/event/${notification.event_id}`;
+                    });
+                    notificationsList.appendChild(notificationElement);
+                }
+                } catch (error) {
+                    console.error('Error fetching event details:', error);
+                }
+            });
+        }
 
     searchBar.addEventListener('input', function() {
         const searchTerm = searchBar.value.toLowerCase();
@@ -379,45 +304,23 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
-    const email = getCookie('user_email'); 
-    document.getElementById('userEmail').textContent = email ? `Logged in as: ${email}` : 'Not logged in';
+    
 
     // Fetch and display public events
-    fetchEvents('/api/events/getpublic', 'publicEventList', false);
+    fetchEvents('/api/events/getpublic', 'publicEventList');
 
     // Fetch and display private events
-    fetchEvents('/api/events/getprivate', 'privateEventList', true);
+    fetchEvents('/api/events/getprivate', 'privateEventList');
 
     // Function to fetch and display events
 
-    async function fetchEvents(url, listId, isPrivate) {
-    const email = getCookie('user_email');
-    let id;
-    
-    if (email) {
-        try {
-            const response = await fetch(`/api/account/userIdThroughEmail?email=${encodeURIComponent(email)}`, {
-                method: 'GET',
-            });
+    async function fetchEvents(url, listId) {
 
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+    let userId = await getUserId(email);
 
-            const data = await response.json();
-            id = data.userId; // Adjust based on the actual response structure
-            console.log('User ID:', id);
-        } catch (error) {
-            console.error('Error fetching the user ID:', error);
-        }
-    } else {
-        id = undefined;
-    }
-
-    console.log(url);
     try {
         const response = await fetch(url);
-        console.log("response: ", response);
+        console.log(response);
         if (!response.ok) {
             throw new Error('Failed to fetch events');
         }
@@ -432,16 +335,53 @@ document.addEventListener('DOMContentLoaded', async function() {
             newEvent.innerHTML = "No events posted. Stay tuned!";
             eventList.appendChild(newEvent);
         } else {
-            data.events.forEach(event => {
-                if (event.is_private === isPrivate) {
+            for (const event of data.events) {
+                    // Fetch admin user data
+                    let adminUsername = 'Loading...';
+                    try {
+                        const adminData = await getUser(event.admin_id);
+                        adminUsername = adminData.user.username;
+                        console.log(adminData)
+                    } catch (error) {
+                        console.error(`Error fetching admin data for event ${event.id}:`, error);
+                    }
+
                     const newEvent = document.createElement('li');
                     newEvent.id = `event-${event.id}`;
+
+                    let registered = false;
                     
+                    if (userId) {
+                        try {
+                            const regResponse = await fetch(`/api/events/isRegistered/${event.id}/${userId}`);
+                            if (!regResponse.ok) {
+                                throw new Error(`Error: ${regResponse.status} ${regResponse.statusText}`);
+                            }
+                            const regData = await regResponse.json();
+                            registered = regData.registered;
+                        } catch (error) {
+                            console.error('Error fetching registration status:', error);
+                        }
+                    }
+
+                    let actionButtonsHTML = '';
                     let deleteButtonHTML = '';
 
-                    // Check if the logged-in user is the admin of the post
-                    if (id === event.admin_id) { // Replace with actual admin ID check
-                        deleteButtonHTML = `<button class="deleteBtn" data-event-id="${event.id}">Delete</button>`;
+                    if (userId) {
+                        if (userId === event.admin_id) {
+                            // Admins should not see register/unregister buttons
+                            actionButtonsHTML = '';
+                        } else {
+                            // Non-admins see both buttons
+                            actionButtonsHTML = `
+                                <button class="registerBtn" data-event-id="${event.id}">Register</button>
+                                <button class="unregisterBtn" data-event-id="${event.id}">Unregister</button>
+                            `;
+                        }
+
+                        if (userId === event.admin_id) {
+                            deleteButtonHTML = `<button class="deleteBtn" data-event-id="${event.id}">Delete</button>`;
+                        }
                     }
 
                     newEvent.innerHTML = `
@@ -449,23 +389,50 @@ document.addEventListener('DOMContentLoaded', async function() {
                             <span class="eventName">${event.event_name}</span>
                             <span class="eventDate">${new Date(event.event_date).toLocaleDateString()} at ${new Date(event.event_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             <div class="eventDescription">${event.description}</div>
+                            <div class="eventAdmin">Admin: ${adminUsername}</div>
+                            ${actionButtonsHTML}
                             ${deleteButtonHTML}
                         </div>
                     `;
 
-                    // Append the new event to the list
                     eventList.appendChild(newEvent);
 
-                    // Attach event listener to event details
                     const eventDetails = newEvent.querySelector('.eventDetails');
-                    if (eventDetails) {
-                        eventDetails.addEventListener('click', function() {
-                            const eventID = this.getAttribute('data-event-id');
-                            window.location.href = `/event/${eventID}`;
-                        });
+                    eventDetails.addEventListener('click', function() {
+                        const eventID = this.getAttribute('data-event-id');
+                        window.location.href = `/event/${eventID}`;
+                    });
+
+                    if (actionButtonsHTML) {
+                        const registerBtn = newEvent.querySelector('.registerBtn');
+                        const unregisterBtn = newEvent.querySelector('.unregisterBtn');
+
+                        if (registerBtn && unregisterBtn) {
+                            // Hide the unregister button if the user is not registered
+                            unregisterBtn.style.display = registered ? 'inline' : 'none';
+                            // Hide the register button if the user is registered
+                            registerBtn.style.display = registered ? 'none' : 'inline';
+
+                            registerBtn.addEventListener('click', async function(event) {
+                                event.stopPropagation();
+                                const eventId = this.getAttribute('data-event-id');
+                                await registerForEvent(eventId, userId);
+                                // Update button visibility
+                                registerBtn.style.display = 'none';
+                                unregisterBtn.style.display = 'inline';
+                            });
+
+                            unregisterBtn.addEventListener('click', async function(event) {
+                                event.stopPropagation();
+                                const eventId = this.getAttribute('data-event-id');
+                                await unregisterFromEvent(eventId, userId);
+                                // Update button visibility
+                                unregisterBtn.style.display = 'none';
+                                registerBtn.style.display = 'inline';
+                            });
+                        }
                     }
 
-                    // Attach event listeners to delete buttons
                     const deleteBtns = newEvent.querySelectorAll('.deleteBtn');
                     deleteBtns.forEach(button => {
                         button.addEventListener('click', async function(event) {
@@ -476,13 +443,229 @@ document.addEventListener('DOMContentLoaded', async function() {
                             }
                         });
                     });
-                }
-            });
+            }
         }
     } catch (error) {
         console.error('Error fetching events:', error);
     }
 }
+async function getNotifications() {
+    try {
+        console.log("in th method");
+        let response = await fetch('/api/notifications/getall', {
+            method: 'GET',
+            credentials: 'include' 
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        console.log("getting data ready");
+        const data = await response.json();
+        console.log("data ready");
+        displayNotifications(data); 
+        // Pass the fetched notifications to display function
+        console.log("joever");
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+    }
+}
+
+
+function displayNotifications(notifications) {
+    const notificationsList = document.getElementById('notifications-list');
+    notificationsList.innerHTML = ''; // Clear existing notifications
+
+    if (notifications.length === 0) {
+        notificationsList.innerHTML = '<li>No new notifications.</li>';
+        return;
+    }
+    notifications.forEach(async (notification) => {
+        try {
+            if (notification.type === "event"){
+            // Fetch event details
+            const response = await fetch(`/api/events/${notification.event_id}`, {
+                method: 'GET',
+                credentials: 'include' // Include cookies in the request
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const event = await response.json();
+
+            // Create a container for the notification content
+            const notificationElement = document.createElement('li');
+            notificationElement.className = 'notification-item';
+
+            const notificationContent = document.createElement('div');
+            notificationContent.innerHTML = `
+                <h4>Event Name: ${event.event_name}</h4>
+                <p>${notification.body}</p>
+            `;
+
+            notificationElement.appendChild(notificationContent);
+
+            notificationElement.addEventListener('click', () => {
+
+                    window.location.href = `/event/${notification.event_id}`;
+            });
+            notificationsList.appendChild(notificationElement);
+        }
+        else if (notification.type === "new contact"){
+            const notificationElement = document.createElement('li');
+            notificationElement.className = 'notification-item';
+
+            const notificationContent = document.createElement('div');
+            notificationContent.innerHTML = `
+                <h4>${notification.body}</h4>
+            `;
+
+            notificationElement.appendChild(notificationContent);
+
+            notificationElement.addEventListener('click', () => {
+                window.location.href = `/messages`;            
+            });
+            notificationsList.appendChild(notificationElement);
+        }
+        else if (notification.type === "registration"){
+            // Fetch event details
+            const response = await fetch(`/api/events/${notification.event_id}`, {
+                method: 'GET',
+                credentials: 'include' // Include cookies in the request
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const event = await response.json();
+
+
+            const amountRes = await fetch(`/api/events/registeredAmount/${notification.event_id}`, {
+                method: 'GET',
+                credentials: 'include' // Include cookies in the request
+            });
+
+            if (!amountRes.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            
+            const amount = await amountRes.json();
+            console.log("AMOUNT: ", amount);
+
+            // Create a container for the notification content
+            const notificationElement = document.createElement('li');
+            notificationElement.className = 'notification-item';
+            let s = "";
+            if (amount.registrationCount > 1) s = "s";
+            const notificationContent = document.createElement('div');
+            notificationContent.innerHTML = `
+                <h4>${notification.body}</h4>
+                <p>It has ${amount.registrationCount} registration${s}!</p>
+            `;
+
+            notificationElement.appendChild(notificationContent);
+
+            notificationElement.addEventListener('click', () => {
+
+                    window.location.href = `/event/${notification.event_id}`;
+            });
+            notificationsList.appendChild(notificationElement);
+        }
+        } catch (error) {
+            console.error('Error fetching event details:', error);
+        }
+    });
+}
+
+
+    async function getUserId(email) {
+        if (email) {
+            try {
+                const response = await fetch(`/api/account/userIdThroughEmail?email=${encodeURIComponent(email)}`, {
+                    method: 'GET',
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                console.log('User ID:', data.userId);
+                return data.userId;
+            } catch (error) {
+                console.error('Error fetching the user ID:', error);
+                return undefined; // Return undefined if there's an error
+            }
+        } else {
+            return undefined;
+        }
+    }
+
+
+    async function registerForEvent(eventId, userId) {
+        try {
+            const response = await fetch('/api/events/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ eventId, userId })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to register for event');
+            }
+
+            const data = await response.json();
+            console.log('Successfully registered:', data);
+
+            const notificationResponse = await fetch(`/api/notifications/createRegistration`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Add Content-Type header
+                },
+                body: JSON.stringify({
+                    event_id: eventId,
+                    body: "You are getting registrations on your event!",
+                    created_at: new Date().toISOString()
+                })
+            });
+
+            if (!notificationResponse.ok) {
+                throw new Error('Failed to post notification');
+            }
+
+            const res = await notificationResponse.json();
+            console.log('Successfully sent notif:', res);
+        } catch (error) {
+            console.error('Error during registration:', error);
+        }
+    }
+
+    async function unregisterFromEvent(eventId, userId) {
+        try {
+            const response = await fetch('/api/events/unregister', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ eventId, userId })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to unregister from event');
+            }
+
+            const data = await response.json();
+            console.log('Successfully unregistered:', data);
+        } catch (error) {
+            console.error('Error during unregistration:', error);
+        }
+    }
+
 
 
     async function deleteEvent(eventId) {
@@ -495,13 +678,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             });
 
             if (response.ok) {
-                alert('Event deleted successfully');
                 // Refresh the list of events
                 fetchEvents('/api/events/getpublic', 'publicEventList', false);
                 fetchEvents('/api/events/getprivate', 'privateEventList', true);
             } else {
                 const errorData = await response.json();
-                alert(`Failed to delete event: ${errorData.error}`);
             }
         } catch (error) {
             console.error('Error deleting event:', error);
@@ -565,7 +746,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 notification.style.display = 'none';
             }, 3000); // Hide the notification after 3 seconds
 
-            document.getElementById('eventForm').reset(); // Reset form fields
+            document.getElementById('eventCreationForm').reset(); // Reset form fields
         } catch (error) {
             console.error('Error creating event:', error);
         }
@@ -584,6 +765,25 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     });
 });
+
+async function getUser(id) {
+    try {
+        const response = await fetch(`/api/account/user/${id}`, {
+            method: 'GET',
+        });
+
+        if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        throw error; // Re-throw the error to be handled by the caller if needed
+    }
+}
+
     </script>
 </body>
 </html>

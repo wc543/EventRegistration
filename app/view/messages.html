@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/style.css">
+    <title>Messages</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            display: flex;
+            width: 200%;
+            height: 90vh;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            max-width: 1200px;
+        }
+
+        .contacts {
+            width: 20%;
+            border-right: 1px solid #ddd;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #fafafa;
+            overflow-y: auto;
+        }
+
+        .contacts h2 {
+            margin: 0;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        #contact-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #contact-list li {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+            font-size: 1.1rem;
+            background-color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        #contact-list li:hover {
+            background-color: #e0e0e0;
+        }
+
+        #contact-list li.selected {
+            background-color: #28a745; /* Blue background for selected contact */
+            color: white; /* White text for selected contact */
+            transform: scale(0.98); /* Slightly shrink to give a pressed effect */
+        }
+
+        #contact-list li:not(.selected) {
+            background-color: white; /* Default background for non-selected contacts */
+            color: black; /* Default text color for non-selected contacts */
+        }
+
+        .message-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: hidden;
+        }
+
+        #messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 10px;
+        }
+
+        .message-input {
+            display: flex;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+
+        #message-input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        #send-button {
+            margin-left: 10px;
+            padding: 10px 20px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        #send-button:hover {
+            background-color: #218838;
+        }
+
+        #default-message {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #888;
+        }
+        #new-conversation {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #888;
+        }
+
+        #username-input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            width: 70%;
+            margin-top: 10px;
+        }
+
+        #start-conversation-button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        #start-conversation-button:hover {
+            background-color: #28a745;
+        }
+        #notification-container {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 500px;
+            z-index: 1000; /* Ensure it appears on top of other content */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .notification {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            width: 100%;
+            max-width: 100%;
+            opacity: 0;
+            transform: translateY(-100%);
+            transition: opacity 0.5s, transform 0.5s;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .notification.hide {
+            opacity: 0;
+            transform: translateY(-100%);
+        }
+        .message {
+            max-width: 60%;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 10px;
+            font-size: 1rem;
+            word-wrap: break-word;
+        }
+
+        /* Incoming messages (align to the left) */
+        .message.incoming {
+            background-color: #e0e0e0;
+            align-self: flex-start;
+            text-align: left;
+            border-top-left-radius: 0;
+        }
+
+        /* Outgoing messages (align to the right) */
+        .message.outgoing {
+            background-color: #28a745;
+            color: white;
+            align-self: flex-end;
+            text-align: right;
+            border-top-right-radius: 0;
+        }
+
+        /* Styling for the message area to allow scrolling */
+        #messages {
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .selected {
+            background-color: #cce5ff; /* Light blue color for selected contact */
+            border: 1px solid #004085; /* Darker border for selected contact */
+            color: #004085; /* Darker text color for selected contact */
+        }
+        #message-caption {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.5rem;
+            font-family: 'Roboto', sans-serif; /* Change font here */
+            color: #333; /* Change text color here */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="notification-container"></div>
+    <div id="userEmail"></div>
+    <button id="notifications-button" class ="hidden">Notifications</button>
+    
+    <!-- Notifications Sidebar -->
+    <div id="notifications-sidebar">
+        <h3>Notifications</h3>
+        <ul id="notifications-list">
+            <!-- Notifications will be dynamically added here -->
+        </ul>
+    </div>
+    <div class="container">
+        <div class="button-container"> 
+            <button id="homebtn" >Home</button>
+            <button id="events-button">Events</button>
+            <button id="logout-button">Logout</button>
+        </div>
+        <div class="contacts">
+            <h2>Contacts</h2>
+            <div id="new-conversation">
+                <input type="text" id="username-input" placeholder="Enter username...">
+                <button id="start-conversation-button">Start a Conversation</button>
+            </div>
+            <ul id="contact-list"></ul>
+        </div>
+        <div class="message-area">
+            <div id="message-caption">Enter which contact you want to message</div>
+            <div id="messages"></div>
+            <div class="message-input">
+                <input type="text" id="message-input" placeholder="Type a message..." disabled>
+                <button id="send-button" disabled>Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+
+        function connectToSocket(id){
+            let socket = io();
+
+            socket.on('connect', () => {
+            const userId = id; // Replace this with the actual logged-in user ID
+            socket.emit('registerUser', userId); // Emit user registration on connect
+            });
+
+            socket.on('receiveMessage', (data) => {
+            console.log('Message received:', data);
+            // Handle incoming messages (e.g., display in UI)
+            });
+            return socket;
+        }
+        function showNotification(message) {
+            const notificationContainer = document.getElementById('notification-container');
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            notificationContainer.appendChild(notification);
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                notification.classList.add('hide');
+                setTimeout(() => {
+                    notificationContainer.removeChild(notification);
+                }, 500);
+            }, 5000);
+        }
+
+
+        async function getNotifications() {
+            try {
+                console.log("in th method");
+                let response = await fetch('/api/notifications/getall', {
+                    method: 'GET',
+                    credentials: 'include' 
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                console.log("getting data ready");
+                const data = await response.json();
+                console.log("data ready");
+                displayNotifications(data); 
+                // Pass the fetched notifications to display function
+                console.log("joever");
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+            }
+        }
+
+
+        function displayNotifications(notifications) {
+            const notificationsList = document.getElementById('notifications-list');
+            notificationsList.innerHTML = ''; // Clear existing notifications
+
+            if (notifications.length === 0) {
+                notificationsList.innerHTML = '<li>No new notifications.</li>';
+                return;
+            }
+            notifications.forEach(async (notification) => {
+                try {
+                    if (notification.type === "event"){
+                    // Fetch event details
+                    const response = await fetch(`/api/events/${notification.event_id}`, {
+                        method: 'GET',
+                        credentials: 'include' // Include cookies in the request
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    const event = await response.json();
+
+                    // Create a container for the notification content
+                    const notificationElement = document.createElement('li');
+                    notificationElement.className = 'notification-item';
+
+                    const notificationContent = document.createElement('div');
+                    notificationContent.innerHTML = `
+                        <h4>Event Name: ${event.event_name}</h4>
+                        <p>${notification.body}</p>
+                    `;
+
+                    notificationElement.appendChild(notificationContent);
+
+                    notificationElement.addEventListener('click', () => {
+
+                            window.location.href = `/event/${notification.event_id}`;
+                    });
+                    notificationsList.appendChild(notificationElement);
+                }
+                else if (notification.type === "new contact"){
+                    const notificationElement = document.createElement('li');
+                    notificationElement.className = 'notification-item';
+
+                    const notificationContent = document.createElement('div');
+                    notificationContent.innerHTML = `
+                        <h4>${notification.body}</h4>
+                    `;
+
+                    notificationElement.appendChild(notificationContent);
+
+                    notificationElement.addEventListener('click', () => {
+                        window.location.href = `/messages`;            
+                    });
+                    notificationsList.appendChild(notificationElement);
+                }
+                else if (notification.type === "registration"){
+                    // Fetch event details
+                    const response = await fetch(`/api/events/${notification.event_id}`, {
+                        method: 'GET',
+                        credentials: 'include' // Include cookies in the request
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    const event = await response.json();
+
+
+                    const amountRes = await fetch(`/api/events/registeredAmount/${notification.event_id}`, {
+                        method: 'GET',
+                        credentials: 'include' // Include cookies in the request
+                    });
+
+                    if (!amountRes.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    
+                    const amount = await amountRes.json();
+                    console.log("AMOUNT: ", amount);
+
+                    // Create a container for the notification content
+                    const notificationElement = document.createElement('li');
+                    notificationElement.className = 'notification-item';
+                    let s = "";
+                    if (amount.registrationCount > 1) s = "s";
+                    const notificationContent = document.createElement('div');
+                    notificationContent.innerHTML = `
+                        <h4>${notification.body}</h4>
+                        <p>It has ${amount.registrationCount} registration${s}!</p>
+                    `;
+
+                    notificationElement.appendChild(notificationContent);
+
+                    notificationElement.addEventListener('click', () => {
+
+                            window.location.href = `/event/${notification.event_id}`;
+                    });
+                    notificationsList.appendChild(notificationElement);
+                }
+                } catch (error) {
+                    console.error('Error fetching event details:', error);
+                }
+            });
+        }
+
+        async function initialize() {
+            const contacts = await getContacts();
+            const contactList = document.getElementById('contact-list');
+            const messageCaption = document.getElementById('message-caption');
+            const messagesDiv = document.getElementById('messages');
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-button');
+            const usernameInput = document.getElementById('username-input');
+            const startConversationButton = document.getElementById('start-conversation-button');
+            const email = getCookie('user_email');
+            const userId = await getUserId(email);
+            const userName = await getUsername(userId);
+            let activeContact = null;
+            const socket = connectToSocket(userId);
+
+            const eventButton = document.getElementById('events-button');
+            const homeButton = document.getElementById('homebtn');
+            const logoutButton = document.getElementById('logout-button');
+            const notifsButton = document.getElementById('notifications-button');
+
+            document.getElementById('notifications-button').addEventListener('click', function() {
+                const sidebar = document.getElementById('notifications-sidebar');
+                sidebar.classList.toggle('active');
+                console.log('Sidebar toggled:', sidebar.classList.contains('active'));
+            });
+            await getNotifications();
+            document.getElementById('userEmail').textContent = `Logged in as: ${email}`;
+
+
+            eventButton.addEventListener('click', () => {
+                    window.location.href = '/events'; // or your login/signup page
+                });
+            homeButton.addEventListener('click', () => {
+                window.location.href = '/'; // or your login/signup page
+            });
+            logoutButton.addEventListener('click', async () => {
+                try {
+                const response = await fetch('/api/account/logout', { method: 'POST' });
+                if (response.ok) {
+                    // Redirect to the login page or refresh the page
+                    window.location.href = '/'; // Or window.location.reload();
+                } else {
+                    console.error('Failed to log out');
+                }
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+            });
+
+            contacts.forEach(contact => {
+                addContact(contact.recipient_id);
+            });
+
+            async function selectContact(contactId) {
+                // Remove 'selected' class from all contacts
+                document.querySelectorAll('#contact-list li').forEach(li => {
+                    li.classList.remove('selected');
+                });
+
+                // Add 'selected' class to the clicked contact
+                const selectedContact = document.querySelector(`#contact-list li[data-contact-id="${contactId}"]`);
+                if (selectedContact) {
+                    selectedContact.classList.add('selected');
+                }
+
+                activeContact = contactId;
+                const messagesResponse = await fetch(`/api/account/user/${contactId}`);
+                if (!messagesResponse.ok) throw new Error('Failed to fetch messages');
+
+                const messagesData = await messagesResponse.json();
+                const defaultMessage = document.getElementById('default-message');
+                if (defaultMessage) {
+                    defaultMessage.style.display = 'none';
+                }
+                console.log("data: ", messagesData);
+                messageCaption.innerHTML = messagesData.user.username;
+
+                const messagesDiv = document.getElementById('messages');
+                messagesDiv.innerHTML = '<div id="default-message"></div>';
+
+                fetch(`/api/messages/getdms/${contactId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const defaultMessage = document.getElementById('default-message');
+                        if (defaultMessage) {
+                            defaultMessage.style.display = 'none';
+                        }
+
+                        data.forEach(message => {
+                            const messageDiv = document.createElement('div');
+                            messageDiv.classList.add('message');
+                            
+                            if (message.poster_id === userId) {
+                                messageDiv.classList.add('outgoing');
+                            } else {
+                                messageDiv.classList.add('incoming');
+                            }
+
+                            messageDiv.textContent = message.body;
+                            messagesDiv.appendChild(messageDiv);
+                        });
+
+                        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                    })
+                    .catch(error => {
+                        console.error('Error fetching messages:', error);
+                        showNotification('Error loading conversation');
+                    });
+
+                enableMessaging();
+            }
+
+
+            function enableMessaging() {
+                messageInput.disabled = false;
+                sendButton.disabled = false;
+                const defaultMessage = document.getElementById('default-message');
+                if (defaultMessage) {
+                    defaultMessage.style.display = 'none';
+                }
+            }
+
+            async function getUserId(email) {
+                if (email) {
+                    try {
+                        const response = await fetch(`/api/account/userIdThroughEmail?email=${encodeURIComponent(email)}`);
+                        if (!response.ok) throw new Error('Failed to fetch user ID');
+                        const data = await response.json();
+                        return data.userId;
+                    } catch (error) {
+                        console.error('Error fetching the user ID:', error);
+                        showNotification('Error fetching user ID');
+                        return undefined;
+                    }
+                }
+                return undefined;
+            }
+
+            async function getUsername(id) {
+                try {
+                    const response = await fetch(`/api/account/username?id=${encodeURIComponent(id)}`);
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch username');
+                    }
+                    const data = await response.json();
+                    return data.username;
+                } catch (error) {
+                    console.error('Error fetching username:', error);
+                    return null; // Or handle the error as needed
+                }
+            }
+
+            async function addContact(contactId) {
+                try {
+                    const response = await fetch(`/api/account/user/${contactId}`);
+                    if (!response.ok) throw new Error('Failed to fetch user data');
+                    const userData = await response.json();
+                    const username = userData.user.username;
+                    const li = document.createElement('li');
+                    li.textContent = username;
+                    li.dataset.contactId = contactId;
+                    li.addEventListener('click', () => selectContact(contactId));
+                    contactList.appendChild(li);
+
+
+                
+
+
+                } catch (error) {
+                    console.error('Error adding contact:', error);
+                    showNotification('Error adding contact');
+                }
+            }
+
+            async function getContacts() {
+                try {
+                    const response = await fetch('/api/messages/getContacts');
+                    if (!response.ok) throw new Error('Failed to fetch contacts');
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error fetching contacts:', error);
+                    showNotification('Error fetching contacts');
+                    return [];
+                }
+            }
+
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
+            }
+
+            startConversationButton.addEventListener('click', async () => {
+                const username = usernameInput.value.trim();
+                if (username) {
+                    try {
+                        const responseExist = await fetch(`/api/account/doesUserExist/${encodeURIComponent(username)}`);
+                        const { exists } = await responseExist.json();
+                        if (!exists) {
+                            showNotification('User does not exist.');
+                            return;
+                        }
+                        const responseId = await fetch(`/api/account/userIdThroughUsername?username=${encodeURIComponent(username)}`);
+                        const { userId } = await responseId.json();
+                        if (!userId) {
+                            showNotification('Failed to retrieve user ID.');
+                            return;
+                        }
+                        const responseCreateContact = await fetch(`/api/messages/createContact/${encodeURIComponent(userId)}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ contactId: userId })
+                        });
+                        if (responseCreateContact.ok) {
+                            contacts.push({ recipient_id: userId });
+                            addContact(userId);
+                            usernameInput.value = '';
+                            const notificationResponse = await fetch(`/api/notifications/createContact`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json', // Add Content-Type header
+                                },
+                                body: JSON.stringify({
+                                    recipientId: userId,
+                                    body: `You have received a message request from ${userName}`,
+                                    created_at: new Date().toISOString()
+                                })
+                            });
+
+                            if (!notificationResponse.ok) {
+                                throw new Error('Failed to post notification');
+                            }
+                            else {
+                                console.log("Notification posted successfully");
+                            }
+                        } else {
+                            const errorData = await responseCreateContact.json();
+                            showNotification(errorData.message || 'Failed to create contact.');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        showNotification('An error occurred while processing your request.');
+                    }
+                }
+            });
+
+            sendButton.addEventListener('click', () => {
+                if (messageInput.value.trim() !== '' && activeContact) {
+                    socket.emit('sendMessage', { senderId: userId, recipientId: activeContact, message: messageInput.value });
+                    
+                    const message = document.createElement('div');
+                    message.classList.add('message', 'outgoing');  // Add outgoing class
+                    message.textContent = messageInput.value;
+                    messagesDiv.appendChild(message);
+                    messageInput.value = '';
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                }
+            });
+
+            // When a message is received
+            socket.on('receiveMessage', (data) => {
+                if (data.senderId === activeContact || data.recipientId === userId) {
+                    const message = document.createElement('div');
+                    message.classList.add('message', 'incoming');  // Add incoming class for received messages
+                    message.textContent = data.message;
+                    messagesDiv.appendChild(message);
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                }
+            });
+        }
+
+        // Initialize the script
+        initialize();
+    </script>
+</body>
+</html>
