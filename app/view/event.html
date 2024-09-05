@@ -17,102 +17,186 @@
         <script src="https://cdn.jsdelivr.net/gh/opencagedata/leaflet-opencage-geocoding@v2.0.0/dist/js/L.Control.OpenCageGeocoding.min.js"></script>
         <script src="/map.js"></script>
         <style>
-            .map-container {
-            height: 400px; /* or any other height you prefer */
-            width: 100%;
-            }
-            .map-container {
-                height: 400px;
-                width: 100%;
-            }
+/* Map Container */
+.map-container {
+    height: 400px; /* or any other height you prefer */
+    width: 100%;
+}
 
-            .video-container {
-                position: relative;
-                width: 100%;
-                max-width: 720px;
-                margin: 0 auto;
-                padding-top: 56.25%; /* 16:9 Aspect Ratio */
-            }
+/* Video Container */
+.video-container {
+    position: relative;
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+}
 
-            .video-container iframe {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                border: 0;
-            }
-            /* Event Details Styling */
+.video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 1;
+    border-color: black;
+}
+
+/* Event Details */
 .event-details {
-    margin: 20px 0;
-    padding: 20px;
-    border: 1px solid #ccc;
+    z-index: 2000; /* Ensure this is higher than .button-container */
+}
+
+/* Invite Section */
+.invite-section {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
     border-radius: 8px;
     background-color: #f9f9f9;
+    text-align: center;
 }
 
-.event-details h3 {
-    font-size: 24px;
-    margin-bottom: 15px;
-}
-
-.event-details p {
-    font-size: 16px;
-    line-height: 1.6;
-    margin-bottom: 10px;
-    color: #333;
-}
-
-.event-details strong {
-    font-weight: bold;
-    color: #000;
-}
-
-.map-container {
-    margin-top: 20px;
-}
-
-.video-container {
-    margin-top: 20px;
-}
-
-.comments {
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid #ddd;
-}
-
-.comment-form input {
-    width: 80%;
-    padding: 10px;
-    margin-right: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.comment-form button {
+/* Invite Button */
+.inviteBtn {
     padding: 10px 20px;
-    background-color: #007bff;
+    background-color: #28a745;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
 }
 
-.comment-form button:hover {
-    background-color: #0056b3;
+.inviteBtn:hover {
+    background-color: #218838;
 }
+
+/* Invite Form Container */
+.invite-form-container {
+    display: none;
+    margin-top: 10px;
+}
+
+.invite-form-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
+.invite-form-container input[type="text"] {
+    width: 80%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.invite-form-container button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.invite-form-container button:hover {
+    background-color: #218838;
+}
+
+/* Comments Section */
+.comments {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+    background-color: #f9f9f9; /* Light background for contrast */
+    border-radius: 8px; /* Rounded corners */
+    padding: 20px; /* Add padding inside the section */
+}
+
+/* Individual Comment */
+.comment {
+    background-color: #fff; /* White background for comments */
+    border: 1px solid #ddd; /* Light border around comments */
+    border-radius: 8px; /* Rounded corners for each comment */
+    padding: 15px; /* Padding inside each comment */
+    margin-bottom: 10px; /* Space between comments */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+}
+
+/* Comment Author */
+.comment-author {
+    font-weight: bold;
+    color: #333; /* Darker color for better readability */
+}
+
+/* Comment Text */
+.comment-text {
+    margin-top: 5px; /* Space between author and comment text */
+    color: #555; /* Slightly lighter color for comment text */
+}
+
+/* Comment Form */
+.comment-form {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #fff; /* White background for the form */
+    border: 1px solid #ddd; /* Light border around the form */
+    border-radius: 8px; /* Rounded corners for the form */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+}
+
+.comment-form input[type="text"] {
+    width: calc(100% - 22px); /* Adjust width to fit within form padding */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 10px; /* Space between input and button */
+    font-size: 16px; /* Larger font size for readability */
+    color: #333; /* Darker text color */
+    box-sizing: border-box; /* Include padding and border in element's total width and height */
+}
+
+.comment-form button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px; /* Match font size with input */
+    transition: background-color 0.3s ease; /* Smooth color transition */
+}
+
+.comment-form button:hover {
+    background-color: #45a049;
+}
+.button-container {
+    z-index: 1000; /* Ensure this is lower than .event-details */
+}
+
 
         </style>
         <title>Events</title>
     </head>
     <body>
+        <div id="userEmail"></div>
         <div class="container">
-            <ul class="nav">
-                <li><a href="../">Home</a></li>
-                <li><a href="../login">Login</a></li>
-            </ul>
-            
+            <div class="button-container"> 
+                <button id="homebtn" >Home</button>
+                <button id="events-button">Events</button>
+                <button id="messagebtn" class="hidden">Messages</button>
+                <button id="login-button" class="hidden">Login</button>
+                <button id="logout-button" class="hidden">Logout</button>
+            </div>
+            <div id="notifications-sidebar">
+                <h3>Notifications</h3>
+                <ul id="notifications-list">
+                    <!-- Notifications will be dynamically added here -->
+                </ul>
+            </div>
+            <button id="notifications-button" class ="hidden">Notifications</button>
+
             <h2>Event Registration</h2>
             
 
@@ -134,162 +218,244 @@
 
 
         <script>
+        async function initPage() {
+        const email = getCookie('user_email');
+        const homeButton = document.getElementById('homebtn');
+        const eventsButton = document.getElementById('events-button');
+        const loginSignupButton = document.getElementById('login-button');
+        const logoutButton = document.getElementById('logout-button');
+        const messageButton = document.getElementById('messagebtn');
+        const notificationButton = document.getElementById('notifications-button');
+
+        document.getElementById('userEmail').textContent = email ? `Logged in as: ${email}` : 'Not logged in';
+
+        homeButton.addEventListener('click', () => {
+            window.location.href = '/'; // or your login/signup page
+        });
+        eventsButton.addEventListener('click', () => {
+            window.location.href = '/events'; // or your login/signup page
+        });
+        messageButton.addEventListener('click', () => {
+            window.location.href = '/messages'; // or your messages page
+        });
+        loginSignupButton.addEventListener('click', () => {
+            window.location.href = '/login'; // or your login/signup page
+        });
+        logoutButton.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/account/logout', { method: 'POST' });
+                if (response.ok) {
+                    // Redirect to the login page or refresh the page
+                    window.location.href = '/events'; // Or window.location.reload();
+                } else {
+                    console.error('Failed to log out');
+                }
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        });
+        document.getElementById('notifications-button').addEventListener('click', function() {
+            const sidebar = document.getElementById('notifications-sidebar');
+            sidebar.classList.toggle('active');
+            console.log('Sidebar toggled:', sidebar.classList.contains('active'));
+        });
+        // Wrap the logic with async/await inside a function
+
+        if (email) {
+            notificationButton.classList.remove('hidden');
+            loginSignupButton.classList.add('hidden');
+            logoutButton.classList.remove('hidden');
+            messageButton.classList.remove('hidden'); // Show the message button if logged in
+            await getNotifications();
+        } else {
+            notificationButton.classList.add('hidden');
+            loginSignupButton.classList.remove('hidden');
+            logoutButton.classList.add('hidden');
+            messageButton.classList.add('hidden'); // Hide the message button if not logged in
+        }
+    }
+
+    // Run the async function when the page loads
+    initPage();
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
+    }
+
 
         async function loadEvent() {
-        const email = getCookie('user_email'); 
-        let userId = await getUserId(email);
-        // Get the event ID from the URL
-        let eventId = window.location.pathname.split('/').pop();
+            const email = getCookie('user_email'); 
+            let userId = await getUserId(email);
+            // Get the event ID from the URL
+            let eventId = window.location.pathname.split('/').pop();
 
-        // Display the event ID on the screen
-        console.log("Event ID: ", eventId);
+            // Display the event ID on the screen
+            console.log("Event ID: ", eventId);
 
-        try {
-            // Fetch event data from the server
-            const response = await fetch(`/api/events/${eventId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            let eventElement = document.getElementById("eventObject");
-
-            if (response.ok) {
-                const event = await response.json();
-                let videoUrl = '';
-
-                try {
-                    if(event.yt_link) {
-                        const url = new URL(event.yt_link);
-                        const videoId = url.searchParams.get('v');
-                        if (videoId) {
-                            videoUrl = await fetchVideo(videoId)
-                        } else {
-                            console.error('YouTube URL missing video ID:', event.yt_link);
-                        }
-                    } else {
-                        console.error('YouTube link undefined', event.yt_link);
+            try {
+                // Fetch event data from the server
+                const response = await fetch(`/api/events/${eventId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
                     }
-                } catch (error) {
-                    console.error('Invalid YouTube URL:', event.yt_link, error);
-                    videoUrl = '';
-                }
+                });
 
-                async function fetchVideo(videoId) {
+                let eventElement = document.getElementById("eventObject");
+
+                if (response.ok) {
+                    const event = await response.json();
+                    let videoUrl = '';
+
                     try {
-                        const response = await fetch(`/api/video/${videoId}`);
-                        if (!response.ok) {
-                            throw new Error('Failed to fetch video');
+                        if(event.yt_link) {
+                            const url = new URL(event.yt_link);
+                            const videoId = url.searchParams.get('v');
+                            if (videoId) {
+                                videoUrl = await fetchVideo(videoId)
+                            } else {
+                                console.error('YouTube URL missing video ID:', event.yt_link);
+                            }
+                        } else {
+                            console.error('YouTube link undefined', event.yt_link);
                         }
-                        const video = await response.json();
-                        console.log("video :", video);
-                        return video.embedUrl;
                     } catch (error) {
-                        console.error('Error:', error);
-                        return '';
+                        console.error('Invalid YouTube URL:', event.yt_link, error);
+                        videoUrl = '';
                     }
-                }
 
-                geocode = await fetchGeocode(event.address);
-                const mapId = `map-${event.id}`;
+                    async function fetchVideo(videoId) {
+                        try {
+                            const response = await fetch(`/api/video/${videoId}`);
+                            if (!response.ok) {
+                                throw new Error('Failed to fetch video');
+                            }
+                            const video = await response.json();
+                            console.log("video :", video);
+                            return video.embedUrl;
+                        } catch (error) {
+                            console.error('Error:', error);
+                            return '';
+                        }
+                    }
 
-                eventElement.innerHTML = `
-                    <div class="event-details">
-                        <h3>${event.event_name}</h3>
-                        <p>${event.description}</p>
-                        <p><strong>Date:</strong> ${new Date(event.event_date).toLocaleDateString()}</p>
-                        <p><strong>Location:</strong> ${event.address}</p>
-                        <div id="${mapId}" class="map-container"></div>
-                        ${(event.is_private && userId === event.admin_id) ? `<button class="inviteBtn" data-event-id="${event.id}">Invite Users</button>` : ''}
+                    geocode = await fetchGeocode(event.address);
+                    const mapId = `map-${event.id}`;
 
-                        ${videoUrl ? `
-                            <h4 class="video-title">Related Video</h4>
-                            <div class="video-container">
-                                <iframe src="${videoUrl}" allowfullscreen></iframe>
-                            </div>
-                        ` : `<p><strong>YouTube Video:</strong> Not available</p>`}
+                    eventElement.innerHTML = `
+                <div class="event-details">
+                    <h3>${event.event_name}</h3>
+                    <p>${event.description}</p>
+                    <p><strong>Date:</strong> ${new Date(event.event_date).toLocaleDateString()}</p>
+                    <p><strong>Location:</strong> ${event.address}</p>
+                    <div id="${mapId}" class="map-container"></div>
+                    
 
-                        <div class="comments">
-                            <h4>Comments</h4>
-                            <form class="comment-form-${event.id}" id="comment-form-${event.id}" data-event-id="${event.id}">
-                                <input type="text" name="comment" placeholder="Add comment" required>
-                                <button type="submit">Post</button>
-                            </form>
-                            <div class="comments-list-${event.id}"></div>
+
+                    ${videoUrl ? `
+                        <h4 class="video-title">Related Video</h4>
+                        <div class="video-container">
+                            <iframe src="${videoUrl}" allowfullscreen></iframe>
                         </div>
+                    ` : `<p><strong>YouTube Video:</strong> Not available</p>`}
+
+                    <div class="comments">
+                        <h4>Comments</h4>
+                        <form class="comment-form" id="comment-form-${event.id}" data-event-id="${event.id}">
+                            <input type="text" name="comment" placeholder="Add comment" required>
+                            <button type="submit">Post</button>
+                        </form>
+                        <div class="comments-list-${event.id}"></div>
                     </div>
-                `;
+                </div>
+                    ${(event.is_private && userId === event.admin_id) ? `
+                        <div class="invite-section">
+                            <button class="inviteBtn" data-event-id="${event.id}">Invite Users</button>
+                            <div class="invite-form-container" id="inviteFormContainer-${event.id}">
+                                <h3>Invite Users to Private Event</h3>
+                                <form id="inviteUserForm-${event.id}">
+                                    <label for="inviteUsername-${event.id}">Username:</label>
+                                    <input type="text" id="inviteUsername-${event.id}" name="inviteUsername" required>
+                                    <input type="hidden" id="eventId-${event.id}" name="eventId">
+                                    <button type="submit">Invite</button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                    ` : ''}
+                    `;
 
-                fetchComments(eventId);
-                if(geocode) {
-                    console.log(mapId, geocode.lat, geocode.lng, event.address, event.event_name);
-                    createMap(mapId, geocode.lat, geocode.lng, event.address, event.event_name);
-                }
-                
+                    fetchComments(eventId);
+                    if(geocode) {
+                        console.log(mapId, geocode.lat, geocode.lng, event.address, event.event_name);
+                        createMap(mapId, geocode.lat, geocode.lng, event.address, event.event_name);
+                    }
+                    
 
-                
-                const form = document.getElementById(`comment-form-${event.id}`);
+                    
+                    const form = document.getElementById(`comment-form-${event.id}`);
 
-                if (form) {
-                    form.addEventListener('submit', async (event) => {
-                        event.preventDefault(); // Prevent the form from submitting normally
-                        const input = form.querySelector('input[name="comment"]');
-                        const commentText = input.value;
+                    if (form) {
+                        form.addEventListener('submit', async (event) => {
+                            event.preventDefault(); // Prevent the form from submitting normally
+                            const input = form.querySelector('input[name="comment"]');
+                            const commentText = input.value;
 
-                        await postComment(eventId, commentText);
-                        input.value = '';
-                    });
+                            await postComment(eventId, commentText);
+                            input.value = '';
+                        });
+                    } else {
+                        console.error(`Form with ID comment-form-${event.id} not found`);
+                    }
+                    if (event.is_private && userId === event.admin_id) {
+                        const inviteBtn = eventElement.querySelector('.inviteBtn');
+                        console.log(inviteBtn);
+                        inviteBtn.addEventListener('click', function() {
+                            const eventId = this.getAttribute('data-event-id');
+                            document.getElementById('eventId').value = eventId; // Set the event ID in the invite form
+                            document.getElementById('inviteFormContainer').style.display = 'block'; // Show the invite form
+                        });
+                    }
+
                 } else {
-                    console.error(`Form with ID comment-form-${event.id} not found`);
+                    console.error('Failed to fetch event');
+                    alert('Failed to load event');
                 }
-                if (event.is_private && userId === event.admin_id) {
-                    const inviteBtn = eventElement.querySelector('.inviteBtn');
-                    console.log(inviteBtn);
-                    inviteBtn.addEventListener('click', function() {
-                        const eventId = this.getAttribute('data-event-id');
-                        document.getElementById('eventId').value = eventId; // Set the event ID in the invite form
-                        document.getElementById('inviteFormContainer').style.display = 'block'; // Show the invite form
-                    });
+            } catch (error) {
+                console.error('Error fetching event:', error);
+            }
+            inviteUserSubmission();
+
+
+        function inviteUserSubmission(){
+            document.getElementById('inviteUserForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('inviteUsername').value;
+            const eventId = document.getElementById('eventId').value;
+
+            try {
+                const response = await fetch('/api/events/inviteUser', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, eventId })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(`User invited successfully! Invitation link: ${result.invitationLink}`);
+                } else {
+                    const errorResult = await response.json();
+                    alert(`Failed to invite user: ${errorResult.error}`);
                 }
-
-            } else {
-                console.error('Failed to fetch event');
-                alert('Failed to load event');
+            } catch (error) {
+                console.error('Error inviting user:', error);
             }
-        } catch (error) {
-            console.error('Error fetching event:', error);
-        }
-        inviteUserSubmission();
-
-
-    function inviteUserSubmission(){
-        document.getElementById('inviteUserForm').addEventListener('submit', async function(event) {
-        event.preventDefault();
-
-        const username = document.getElementById('inviteUsername').value;
-        const eventId = document.getElementById('eventId').value;
-
-        try {
-            const response = await fetch('/api/events/inviteUser', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, eventId })
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                alert(`User invited successfully! Invitation link: ${result.invitationLink}`);
-            } else {
-                const errorResult = await response.json();
-                alert(`Failed to invite user: ${errorResult.error}`);
-            }
-        } catch (error) {
-            console.error('Error inviting user:', error);
-        }
-    });
+        });
     }
 
     async function getUserId(email) {
@@ -336,6 +502,8 @@
             }
         }
 
+        
+
     // Handle tab switching
     const tabs = document.querySelectorAll('.tab');
     tabs.forEach(tab => {
@@ -349,7 +517,155 @@
     });
     }
 
+    function showNotification(message) {
+            const notificationContainer = document.getElementById('notification-container');
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            notificationContainer.appendChild(notification);
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                notification.classList.add('hide');
+                setTimeout(() => {
+                    notificationContainer.removeChild(notification);
+                }, 500);
+            }, 5000);
+        }
 
+
+        async function getNotifications() {
+            try {
+                console.log("in th method");
+                let response = await fetch('/api/notifications/getall', {
+                    method: 'GET',
+                    credentials: 'include' 
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                console.log("getting data ready");
+                const data = await response.json();
+                console.log("data ready");
+                displayNotifications(data); 
+                // Pass the fetched notifications to display function
+                console.log("joever");
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+            }
+        }
+
+
+        function displayNotifications(notifications) {
+            const notificationsList = document.getElementById('notifications-list');
+            notificationsList.innerHTML = ''; // Clear existing notifications
+
+            if (notifications.length === 0) {
+                notificationsList.innerHTML = '<li>No new notifications.</li>';
+                return;
+            }
+            notifications.forEach(async (notification) => {
+                try {
+                    if (notification.type === "event"){
+                    // Fetch event details
+                    const response = await fetch(`/api/events/${notification.event_id}`, {
+                        method: 'GET',
+                        credentials: 'include' // Include cookies in the request
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    const event = await response.json();
+
+                    // Create a container for the notification content
+                    const notificationElement = document.createElement('li');
+                    notificationElement.className = 'notification-item';
+
+                    const notificationContent = document.createElement('div');
+                    notificationContent.innerHTML = `
+                        <h4>Event Name: ${event.event_name}</h4>
+                        <p>${notification.body}</p>
+                    `;
+
+                    notificationElement.appendChild(notificationContent);
+
+                    notificationElement.addEventListener('click', () => {
+
+                            window.location.href = `/event/${notification.event_id}`;
+                    });
+                    notificationsList.appendChild(notificationElement);
+                }
+                else if (notification.type === "new contact"){
+                    const notificationElement = document.createElement('li');
+                    notificationElement.className = 'notification-item';
+
+                    const notificationContent = document.createElement('div');
+                    notificationContent.innerHTML = `
+                        <h4>${notification.body}</h4>
+                    `;
+
+                    notificationElement.appendChild(notificationContent);
+
+                    notificationElement.addEventListener('click', () => {
+                        window.location.href = `/messages`;            
+                    });
+                    notificationsList.appendChild(notificationElement);
+                }
+                else if (notification.type === "registration"){
+                    // Fetch event details
+                    const response = await fetch(`/api/events/${notification.event_id}`, {
+                        method: 'GET',
+                        credentials: 'include' // Include cookies in the request
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    const event = await response.json();
+
+
+                    const amountRes = await fetch(`/api/events/registeredAmount/${notification.event_id}`, {
+                        method: 'GET',
+                        credentials: 'include' // Include cookies in the request
+                    });
+
+                    if (!amountRes.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    
+                    const amount = await amountRes.json();
+                    console.log("AMOUNT: ", amount);
+
+                    // Create a container for the notification content
+                    const notificationElement = document.createElement('li');
+                    notificationElement.className = 'notification-item';
+                    let s = "";
+                    if (amount.registrationCount > 1) s = "s";
+                    const notificationContent = document.createElement('div');
+                    notificationContent.innerHTML = `
+                        <h4>${notification.body}</h4>
+                        <p>It has ${amount.registrationCount} registration${s}!</p>
+                    `;
+
+                    notificationElement.appendChild(notificationContent);
+
+                    notificationElement.addEventListener('click', () => {
+
+                            window.location.href = `/event/${notification.event_id}`;
+                    });
+                    notificationsList.appendChild(notificationElement);
+                }
+                } catch (error) {
+                    console.error('Error fetching event details:', error);
+                }
+            });
+        }
     // Run the async function
     loadEvent();
         </script>

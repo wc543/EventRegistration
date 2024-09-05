@@ -28,8 +28,8 @@ router.get('/getall', authMiddleware, async (req, res) => {
 });
 
 
-router.post('/create', authMiddleware, async (req, res) => {
-    const { event_id, body, created_at } = req.body;
+router.post('/createComment', authMiddleware, async (req, res) => {
+    const {event_id, body, created_at } = req.body;
   
     if (!body || !created_at) {
         return res.status(400).json({ message: 'Body and created_at are required' });
@@ -50,8 +50,8 @@ router.post('/create', authMiddleware, async (req, res) => {
   
         // Insert notification into the database
         const result = await pool.query(
-            'INSERT INTO notifications (user_id, event_id, body, created_at) VALUES ($1, $2, $3, $4) RETURNING *',
-            [admin_id, event_id, body, created_at]
+            'INSERT INTO notifications (type, user_id, event_id, body, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            ["event", admin_id, event_id, body, created_at]
         );
   
         const newNotification = result.rows[0];
@@ -62,4 +62,73 @@ router.post('/create', authMiddleware, async (req, res) => {
     }
   });
 
+  router.post('/createContact', authMiddleware, async (req, res) => {
+    const {recipientId, body, created_at } = req.body;
+  
+    if (!body || !created_at) {
+        return res.status(400).json({ message: 'Body and created_at are required' });
+    }
+  
+    try {
+        // Insert notification into the database
+        const result = await pool.query(
+            'INSERT INTO notifications (type, user_id, body, created_at) VALUES ($1, $2, $3, $4) RETURNING *',
+            ["new contact", recipientId, body, created_at]
+        );
+  
+        const newNotification = result.rows[0];
+        res.status(201).json(newNotification);
+    } catch (error) {
+        console.error('Error creating notification:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  router.post('/createRegistration', authMiddleware, async (req, res) => {
+    const { event_id, body, created_at } = req.body;
+
+    if (!body || !created_at) {
+        return res.status(400).json({ message: 'Body and created_at are required' });
+    }
+
+    try {
+        // Fetch the event to get the author ID
+        const eventResult = await pool.query(
+            'SELECT admin_id FROM events WHERE id = $1',
+            [event_id]
+        );
+
+        if (eventResult.rows.length === 0) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+
+        const admin_id = eventResult.rows[0].admin_id;
+
+        // Check if a notification for this event_id already exists
+        const existingNotification = await pool.query(
+            'SELECT * FROM notifications WHERE event_id = $1',
+            [event_id]
+        );
+
+        if (existingNotification.rows.length === 0) {
+            const result = await pool.query(
+                'INSERT INTO notifications (type, user_id, event_id, body, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+                ["registration", admin_id, event_id, body, created_at]
+            );
+
+            const newNotification = result.rows[0];
+            return res.status(201).json(newNotification); // Ensure response is sent
+        } else {
+            return res.status(200).json({ message: 'Notification already exists' }); // Response when notification exists
+        }
+    } catch (error) {
+        console.error('Error creating notification:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+
+  
 module.exports = router;
+
+

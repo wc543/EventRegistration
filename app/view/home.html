@@ -19,20 +19,16 @@
     <script src="map.js" defer></script>
 
     <title>Events</title>
-    <style>
-        /* Add any other styles needed for your buttons */
-    </style>
 </head>
 <body>
-
+    <div id="userEmail"></div>
     <div class="container">
-
-    
-        <ul class="nav">
-            <li><a href="/events">Events</a></li>
-            <li><a id="login-signup-button" href="login">Log In/Sign Up</a></li>
-            <li><a id="logout-button">Log Out</a></li>
-        </ul>
+        <div class="button-container">
+            <button id="events-button">Events</button>
+            <button id="messagebtn" class="hidden">Messages</button>
+            <button id="login-signup-button">Login/Signup</button>
+            <button id="logout-button" class="hidden">Logout</button>
+        </div>
         <h2>Home Page</h2>
         <input type="text" id="searchBar" placeholder="Search events by name..." style="width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ccc;">
         <div class="tab-container">
@@ -49,7 +45,7 @@
             <ul id="registeredEventList"></ul>
         </div>
         <!-- Notifications Button -->
-        <button id="notifications-button">Notifications</button>
+        <button id="notifications-button" class ="hidden">Notifications</button>
     
         <!-- Notifications Sidebar -->
         <div id="notifications-sidebar">
@@ -85,25 +81,44 @@
         document.addEventListener('DOMContentLoaded', async function()  {
             try {
                 const email = getCookie('user_email'); 
+                const notifButton = document.getElementById('notifications-button');
+                const eventButton = document.getElementById('events-button');
                 const loginSignupButton = document.getElementById('login-signup-button');
                 const logoutButton = document.getElementById('logout-button');
+                const messageButton = document.getElementById('messagebtn');
                 if (email) {
-                    document.getElementById('notifications-button').style.display = 'block';
-                    loginSignupButton.style.display = 'none';
-                    logoutButton.style.display = 'block';
+                    loginSignupButton.classList.add('hidden');
+                    logoutButton.classList.remove('hidden');
+                    messageButton.classList.remove('hidden');
+                    notifButton.classList.remove('hidden');
                     await getNotifications();
                 } else {
-                    document.getElementById('notifications-button').style.display = 'none';
-                    loginSignupButton.style.display = 'block';
-                    logoutButton.style.display = 'none';
+                    loginSignupButton.classList.remove('hidden');
+                    logoutButton.classList.add('hidden');
+                    messageButton.classList.add('hidden');
+                    notifButton.classList.add('hidden');
                 }
-            } catch (error) {
-                console.error('Error checking authentication status:', error);
-                document.getElementById('notifications-button').style.display = 'none';
-                document.getElementById('login-signup-button').style.display = 'block';
-                document.getElementById('logout-button').style.display = 'none';
-            }
-        });
+                document.getElementById('userEmail').textContent = email ? `Logged in as: ${email}` : 'Not logged in';
+
+                eventButton.addEventListener('click', () => {
+                    window.location.href = '/events'; // or your login/signup page
+                });
+                loginSignupButton.addEventListener('click', () => {
+                    window.location.href = '/login'; // or your login/signup page
+                });
+                messageButton.addEventListener('click', () => {
+                    window.location.href = '/messages'; // or your messages page
+                });
+
+
+                } catch (error) {
+                    console.error('Error checking authentication status:', error);
+                    loginSignupButton.classList.remove('hidden');
+                    logoutButton.classList.add('hidden');
+                    messageButton.classList.add('hidden'); // Hide the message button on error
+                }
+
+            });
 
         async function getNotifications() {
             try {
@@ -128,49 +143,114 @@
         }
 
         function displayNotifications(notifications) {
-    const notificationsList = document.getElementById('notifications-list');
-    notificationsList.innerHTML = ''; // Clear existing notifications
+            const notificationsList = document.getElementById('notifications-list');
+            notificationsList.innerHTML = ''; // Clear existing notifications
 
-    if (notifications.length === 0) {
-        notificationsList.innerHTML = '<li>No new notifications.</li>';
-        return;
-    }
-
-    notifications.forEach(async (notification) => {
-        try {
-            // Fetch event details
-            const response = await fetch(`/api/events/${notification.event_id}`, {
-                method: 'GET',
-                credentials: 'include' // Include cookies in the request
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+            if (notifications.length === 0) {
+                notificationsList.innerHTML = '<li>No new notifications.</li>';
+                return;
             }
+            notifications.forEach(async (notification) => {
+                try {
+                    if (notification.type === "event"){
+                    // Fetch event details
+                    const response = await fetch(`/api/events/${notification.event_id}`, {
+                        method: 'GET',
+                        credentials: 'include' // Include cookies in the request
+                    });
 
-            const event = await response.json();
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
 
-            // Create a container for the notification content
-            const notificationElement = document.createElement('li');
-            notificationElement.className = 'notification-item';
+                    const event = await response.json();
 
-            const notificationContent = document.createElement('div');
-            notificationContent.innerHTML = `
-                <h4>Event Name: ${event.event_name}</h4>
-                <p>${notification.body}</p>
-            `;
+                    // Create a container for the notification content
+                    const notificationElement = document.createElement('li');
+                    notificationElement.className = 'notification-item';
 
-            notificationElement.appendChild(notificationContent);
-            notificationElement.addEventListener('click', () => {
-                window.location.href = `/event/${notification.event_id}`;
+                    const notificationContent = document.createElement('div');
+                    notificationContent.innerHTML = `
+                        <h4>Event Name: ${event.event_name}</h4>
+                        <p>${notification.body}</p>
+                    `;
+
+                    notificationElement.appendChild(notificationContent);
+
+                    notificationElement.addEventListener('click', () => {
+
+                            window.location.href = `/event/${notification.event_id}`;
+                    });
+                    notificationsList.appendChild(notificationElement);
+                }
+                else if (notification.type === "new contact"){
+                    const notificationElement = document.createElement('li');
+                    notificationElement.className = 'notification-item';
+
+                    const notificationContent = document.createElement('div');
+                    notificationContent.innerHTML = `
+                        <h4>${notification.body}</h4>
+                    `;
+
+                    notificationElement.appendChild(notificationContent);
+
+                    notificationElement.addEventListener('click', () => {
+                        window.location.href = `/messages`;            
+                    });
+                    notificationsList.appendChild(notificationElement);
+                }
+                else if (notification.type === "registration"){
+                    // Fetch event details
+                    const response = await fetch(`/api/events/${notification.event_id}`, {
+                        method: 'GET',
+                        credentials: 'include' // Include cookies in the request
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    const event = await response.json();
+
+
+                    const amountRes = await fetch(`/api/events/registeredAmount/${notification.event_id}`, {
+                        method: 'GET',
+                        credentials: 'include' // Include cookies in the request
+                    });
+
+                    if (!amountRes.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    
+                    const amount = await amountRes.json();
+                    console.log("AMOUNT: ", amount);
+
+                    // Create a container for the notification content
+                    const notificationElement = document.createElement('li');
+                    notificationElement.className = 'notification-item';
+                    let s = "";
+                    if (amount.registrationCount > 1) s = "s";
+                    const notificationContent = document.createElement('div');
+                    notificationContent.innerHTML = `
+                        <h4>${notification.body}</h4>
+                        <p>It has ${amount.registrationCount} registration${s}!</p>
+                    `;
+
+                    notificationElement.appendChild(notificationContent);
+
+                    notificationElement.addEventListener('click', () => {
+
+                            window.location.href = `/event/${notification.event_id}`;
+                    });
+                    notificationsList.appendChild(notificationElement);
+                }
+                } catch (error) {
+                    console.error('Error fetching event details:', error);
+                }
             });
-            notificationsList.appendChild(notificationElement);
-
-        } catch (error) {
-            console.error('Error fetching event details:', error);
         }
-    });
-}
+
+
 
     searchBar.addEventListener('input', function() {
         const searchTerm = searchBar.value.toLowerCase();
@@ -382,6 +462,21 @@
                                         // Update button visibility
                                         registerBtn.style.display = 'none';
                                         unregisterBtn.style.display = 'inline';
+                                        const notificationResponse = await fetch(`/api/notifications/createRegistration`, {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json', // Add Content-Type header
+                                            },
+                                            body: JSON.stringify({
+                                                event_id: eventId,
+                                                body: "You are getting registrations on your event!",
+                                                created_at: new Date().toISOString()
+                                            })
+                                        });
+
+                                        if (!notificationResponse.ok) {
+                                            throw new Error('Failed to post notification');
+                                        }
                                     });
 
                                     unregisterBtn.addEventListener('click', async function(event) {
@@ -471,6 +566,8 @@
 
             const data = await response.json();
             console.log('Successfully registered:', data);
+
+            
         } catch (error) {
             console.error('Error during registration:', error);
         }
@@ -509,10 +606,9 @@
             });
 
             if (response.ok) {
-                alert('Event deleted successfully');
                 // Refresh the list of events
-                fetchEvents('/api/events/getpublic', 'publicEventList', false);
-                fetchEvents('/api/events/getprivate', 'privateEventList', true);
+                fetchEvents('/api/events/usersevents', 'yourEventList');
+                fetchEvents('/api/events/usersregistered', 'registeredEventList');
             } else {
                 const errorData = await response.json();
                 alert(`Failed to delete event: ${errorData.error}`);
@@ -520,9 +616,15 @@
         } catch (error) {
             console.error('Error deleting event:', error);
         }
+
+        const eventElement = document.getElementById(`event-${eventId}`);
+            if (eventElement) {
+                eventElement.remove(); // Or use eventElement.style.display = 'none';
+            }
+
     }
         // Fetch and display public events when the page loads
-        window.onload = fetchPublicEvents;
+        window.onload = fetchPublicEvents();
     </script>
 </body>
 </html>

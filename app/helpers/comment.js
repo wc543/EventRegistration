@@ -70,11 +70,10 @@ async function postComment(eventId, commentText) {
         let username = usernameBody.username;
 
         // Post notification
-        const notificationResponse = await fetch(`/api/notifications/create`, {
+        const notificationResponse = await fetch(`/api/notifications/createComment`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json', // Add Content-Type header
-                'session_key': 'ssKey' // Ensure this header is needed or correct
             },
             body: JSON.stringify({
                 event_id: eventId,

@@ -3,7 +3,7 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f0f2f5;
     margin: 0;
-    padding: 20px;
+    padding-top: 60px; /* Add padding equal to the navbar height */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -166,6 +166,22 @@ body {
     transform: translateY(-5px);
 }
 
+
+
+#userEmail {
+    position: fixed; /* Use fixed to keep it visible relative to the viewport */
+    top: 20px; /* Adjust as needed */
+    left: 20px; /* Adjust as needed */
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    z-index: 1001; /* Ensure it's above other content */
+    background-color: #fff; /* Optional: background to ensure readability */
+    padding: 5px 10px; /* Optional: padding for better visibility */
+    border-radius: 5px; /* Optional: rounded corners for aesthetic */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Optional: shadow for better visibility */
+}
+
 /* Event Details */
 .eventDetails {
     display: flex;
@@ -226,13 +242,14 @@ body {
     right: 0; /* Slide into view */
 }
 
+
 #notifications-button {
     position: fixed;
     right: 10px;
-    top: 20px;
+    top: 12px;
     z-index: 1100;
     padding: 10px 20px;
-    background-color: #007BFF;
+    background-color: #4CAF50;
     color: white;
     border: none;
     cursor: pointer;
@@ -269,12 +286,41 @@ body {
     margin: 0;
 }
 
+/*Different Notification */
+#notification {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px; /* Adjust width as needed */
+    z-index: 1000; /* Ensure it's above other content */
+    pointer-events: none; /* Prevent interaction */
+}
+
+.notification {
+    background-color: #4CAF50; /* Green background for success, change as needed */
+    color: white;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(-100px); /* Start off-screen */
+    animation: slideIn 0.5s forwards, fadeOut 0.5s 2.5s forwards;
+}
+
 /* Navbar */
 .navbar {
     background-color: #333;
-    padding: 10px;
+    width: 100%; /* Make the navbar span the full width of the screen */
+    padding: 10px 0; /* Adjust padding if needed */
+    position: fixed; /* Fix the navbar to the top of the page */
+    top: 0;
+    left: 0;
+    z-index: 1000; /* Ensure it stays above other elements */
 }
 
+/* Adjust the navigation list */
 .nav-list {
     list-style-type: none;
     margin: 0;
@@ -283,6 +329,7 @@ body {
     justify-content: space-around;
 }
 
+/* Adjust the individual items */
 .nav-item {
     color: white;
     text-decoration: none;
@@ -292,6 +339,7 @@ body {
 .nav-item:hover {
     background-color: #555;
 }
+
 
 /* Titles */
 .page-title {
@@ -419,3 +467,55 @@ body {
 .unregisterBtn:hover {
     background-color: gray;      /* Gray background on hover */
 }
+
+
+.button-container {
+    position: fixed;
+    top: 0;
+    left: 0; /* Ensure it starts from the leftmost edge */
+    width: 100vw; /* Full viewport width */
+    background-color: #f8f8f8;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.button-container button {
+    margin: 0 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.button-container button:hover {
+    background-color: #45a049;
+}
+
+
+/* Hide element without affecting layout */
+.hidden {
+    display: none;
+}
+
+
+
+/* Specific styles for different button types */
+#logout-button {
+    background-color: #28a745;
+}
+
+#logout-button:hover {
+    background-color: #218838;
+}
+
+#messagebtn, #events-button {
+    background-color: #28a745;
+}
+
+#messagebtn:hover, #events-button:hover {
+    background-color: #218838;
+}
+
