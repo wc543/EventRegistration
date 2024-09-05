@@ -118,3 +118,37 @@ body {
     height: 500px;
     width: 500px;
 }
+
+.event-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.event-details {
+    flex: 3;
+    margin-right: 20px;
+}
+
+.comments-section {
+    flex: 1;
+    border: 1px solid #ddd;
+    padding: 10px;
+    max-width: 300px;
+}
+
+.comment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.comment-form input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.comments-list {
+    margin-top: 20px;
+}

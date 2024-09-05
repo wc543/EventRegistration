@@ -111,18 +111,30 @@
                 console.log(event.price);
 
                 eventElement.innerHTML = `
-                    <h3>${event.event_name}</h3>
-                    <p>${event.description}</p>
-                    <p><strong>Date:</strong> ${new Date(event.event_date).toLocaleDateString()}</p>
-                    <p><strong>Location:</strong> ${event.address}</p>
-                    <div id="${mapId}" class="map-container"></div>
-                    ${event.is_private ? `<button class="inviteBtn" data-event-id="${event.id}">Invite Users</button>` : ''}
-                    <p><strong>YouTube Link:</strong> <a href="${event.yt_link}" target="_blank">${event.yt_link}</a></p>
+                    <div class="event-container">
+                        <div class="event-details">
+                            <h3>${event.event_name}</h3>
+                            <p>${event.description}</p>
+                            <p><strong>Date:</strong> ${new Date(event.event_date).toLocaleDateString()}</p>
+                            <p><strong>Location:</strong> ${event.address}</p>
+                            <div id="${mapId}" class="map-container"></div>
+                            ${event.is_private ? `<button class="inviteBtn" data-event-id="${event.id}">Invite Users</button>` : ''}
+                            <p><strong>YouTube Link:</strong> <a href="${event.yt_link}" target="_blank">${event.yt_link}</a></p>
 
-                    ${videoUrl ? `
-                        <p><strong>YouTube Video:</strong></p>
-                        <iframe width="720" height="400" src="${videoUrl}" frameborder="0" allowfullscreen></iframe>
-                        ` : `<p><strong>YouTube Video:</strong></p>`}
+                            ${videoUrl ? `
+                                <p><strong>YouTube Video:</strong></p>
+                                <iframe width="720" height="400" src="${videoUrl}" frameborder="0" allowfullscreen></iframe>
+                                ` : `<p><strong>YouTube Video:</strong></p>`}
+                        </div>
+                        <div class="comments-section">
+                            <h4>Comments</h4>
+                            <form id="comment-form-${event.id}" data-event-id="${event.id}" class="comment-form">
+                                <input type="text" name="comment" placeholder="Add comment" required>
+                                <button type="submit">Post</button>
+                            </form>
+                            <div class="comments-list-${event.id}"></div>
+                        </div>
+                    </div>
                 `;
                 fetchComments(eventId);
                 if(geocode) {
