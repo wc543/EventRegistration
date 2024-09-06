@@ -140,7 +140,9 @@
     
                 if (response.ok) {
                     displayMessage('Signed up successfully!', 'success');
-                    // Optionally, you can add logic here to redirect to login page after success
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000); // 2 second delay before redirecting
                 } else {
                     const errorData = await response.json();
                     displayMessage(`Error: ${errorData.error || 'Something went wrong!'}`, 'error');
